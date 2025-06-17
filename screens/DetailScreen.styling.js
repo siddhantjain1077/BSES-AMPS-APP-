@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-const getStyles = (colors) =>
+const getStyles = (colors, isDark) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -10,17 +10,18 @@ const getStyles = (colors) =>
 
     BijliSevaKendraImage: {
       width: '100%',
-      height: 150,
+      height: 170,
       marginBottom: 12,
-      marginTop: 50,
+      marginTop: 17,
     },
 
     row: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       marginVertical: 6,
       justifyContent: 'space-between',
       borderBottomWidth: 0.5,
-      borderColor: colors.isDark ? '#555' : '#ccc',
+      borderColor: isDark ? '#555' : '#ccc',
       paddingBottom: 6,
     },
 
@@ -34,6 +35,8 @@ const getStyles = (colors) =>
       flex: 1.2,
       textAlign: 'right',
       flexShrink: 1,
+      flexWrap: 'wrap',
+      maxWidth: '100%',
     },
 
     collapsibleContainer: {
@@ -85,7 +88,7 @@ const getStyles = (colors) =>
 
 
     cfEntryCard: {
-      marginBottom: 12,
+      marginBottom: 10,
       borderRadius: 8,
       overflow: 'hidden',
       borderWidth: 1,
@@ -96,6 +99,9 @@ const getStyles = (colors) =>
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.08,
       shadowRadius: 2,
+      flexWrap: 'wrap',
+      overflow: 'hidden',
+      maxWidth: '100%'
     },
 
     mcdEntryCard: {
@@ -171,14 +177,17 @@ const getStyles = (colors) =>
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 999,         // ✅ this
+      elevation: 10,       // ✅ for Android
     },
     modalView: {
       backgroundColor: colors.card,
       borderRadius: 20,
       padding: 20,
-      elevation: 5,
+      elevation: 20,
       width: '90%',
       maxHeight: '80%',
+      zIndex: 1000,
       color: colors.isDark ? '#fff' : '#ccc'
     },
     modalTitle: {

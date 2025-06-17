@@ -9,13 +9,15 @@ import {
     Modal,
     TextInput,
 } from 'react-native';
-import getStyles from './DetailScreen.styling';
-import bijli_image from '../assets/BijliSevaKendra.png';
+import getStyles from '../screens/DetailScreen.styling';
 import { useTheme } from '../screens/ThemeContext';
+import bijliLight from '../assets/Bijli_kendra_white.png';
+import bijliDark from '../assets/BijliSevaKendra_withoutBG.png';
+
 
 const CollapsibleCard = ({ title, children, initialExpanded = true }) => {
-    const { colors } = useTheme();
-    const styles = getStyles(colors);
+    const { colors, isDark } = useTheme();
+    const styles = getStyles(colors, isDark);
 
     const [expanded, setExpanded] = useState(initialExpanded);
     const toggleExpanded = () => {
@@ -35,8 +37,8 @@ const CollapsibleCard = ({ title, children, initialExpanded = true }) => {
 };
 
 const KeyValue = ({ label, value, color }) => {
-    const { colors } = useTheme();
-    const styles = getStyles(colors);
+    const { colors, isDark } = useTheme();
+    const styles = getStyles(colors, isDark);
     return (
         <View style={styles.row}>
             <Text style={[styles.label, { color: color ?? colors.text }]}>{label}</Text>
@@ -46,8 +48,8 @@ const KeyValue = ({ label, value, color }) => {
 };
 
 const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
-    const { colors } = useTheme();
-    const styles = getStyles(colors);
+    const { colors, isDark } = useTheme();
+    const styles = getStyles(colors, isDark);
     const [selectedReason, setSelectedReason] = useState(null);
     const [comment, setComment] = useState('');
     const [totalSelectedReasons, setTotalSelectedReasons] = useState(0);
@@ -102,8 +104,8 @@ const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
 };
 
 const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
-    const { colors } = useTheme();
-    const styles = getStyles(colors);
+    const { colors, isDark } = useTheme();
+    const styles = getStyles(colors, isDark);
     const [comment, setComment] = useState('');
     const handleSubmit = () => {
         onSubmit(comment);
@@ -139,8 +141,8 @@ const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
 };
 
 const TFrevisitModal = ({ visible, onClose, onSubmit }) => {
-    const { colors } = useTheme();
-    const styles = getStyles(colors);
+    const { colors, isDark } = useTheme();
+    const styles = getStyles(colors, isDark);
     const [comment, setComment] = useState('');
     const handleSubmit = () => {
         if (comment.trim()) {
@@ -178,8 +180,8 @@ const TFrevisitModal = ({ visible, onClose, onSubmit }) => {
 };
 
 const DetailScreen = ({ route }) => {
-    const { colors } = useTheme();
-    const styles = getStyles(colors);
+    const { colors, isDark } = useTheme();
+    const styles = getStyles(colors, isDark);
     const [isRejectModalVisible, setRejectModalVisible] = useState(false);
     const [isApproveModalVisible, setApproveModalVisible] = useState(false);
     const [isTFRevisitVisible, setTFRevisitVisible] = useState(false);
@@ -316,8 +318,12 @@ const DetailScreen = ({ route }) => {
 
     return (
         <ScrollView style={styles.container}>
-            <Image source={bijli_image} style={styles.BijliSevaKendraImage} resizeMode="contain" />
-            <Text style={styles.sectionTitle}>Order Info</Text>
+            <Image
+                source={isDark ? bijliDark : bijliLight}
+                style={styles.BijliSevaKendraImage}
+                resizeMode="contain"
+            />
+            <Text style={styles.sectionTitle}>Order Info :</Text>
 
             <CollapsibleCard title="Basic Details">
                 <KeyValue label="Order No." value={data.orderNo} />
@@ -392,36 +398,45 @@ const DetailScreen = ({ route }) => {
             </CollapsibleCard>
 
             {/* CF DETAILS Section as Collapsible Card */}
-            <CollapsibleCard title="CF DETAILS" colors={colors}>
+            <CollapsibleCard title="CF DETAILS">
                 {Array.isArray(data.cfDetails) && data.cfDetails.map((entry, index) => (
-                    <View key={index} style={styles.cfEntryCard}>
-                        <KeyValue label="CA" value={entry.ca} color={colors.text} />
-                        <KeyValue label="Net OS Amt" value={entry.netOSAmt} color={colors.text} />
-                        <KeyValue label="Name" value={entry.name} color={colors.text} />
-                        <KeyValue label="Address" value={entry.address} color={colors.text} />
-                    </View>
+                    <React.Fragment key={index}>
+                        <KeyValue label="CA" value={entry.ca} />
+                        <KeyValue label="Net OS Amt" value={entry.netOSAmt} />
+                        <KeyValue label="Name" value={entry.name} />
+                        <KeyValue label="Address" value={entry.address} />
+                    </React.Fragment>
                 ))}
             </CollapsibleCard>
 
             {/* MCD DETAILS Section as Collapsible Card */}
             <CollapsibleCard title="MCD DETAILS" initialExpanded={false}>
                 {Array.isArray(data.mcdDetails) && data.mcdDetails.map((entry, index) => (
-                    <View key={index} style={styles.mcdEntryCard}>
+                    <React.Fragment key={index}>
                         <KeyValue label="Name of Unit" value={entry.nameOfUnit} color={colors.text} />
                         <KeyValue label="Address of Property" value={entry.addressOfProperty} color={colors.text} />
-                    </View>
+                    </React.Fragment>
                 ))}
             </CollapsibleCard>
             {/* Action buttons and modals */}
             <View style={styles.tfRevisitContainer}>
-                <TouchableOpacity style={styles.tfRevisitButton} onPress={() => setTFRevisitVisible(true)}>
+                <TouchableOpacity style={styles.tfRevisitButton} onPress={() => 
+                    setTFRevisitVisible(true)}>
                     <Text style={styles.tfRevisitTitle}>TF REVISIT</Text>
                 </TouchableOpacity>
                 <View style={styles.tfRevisitButtons}>
-                    <TouchableOpacity style={styles.rejectButton} onPress={() => setRejectModalVisible(true)}>
+                    <TouchableOpacity style={styles.rejectButton} onPress={() => {
+                        console.log("Reject Button Clicked");
+                        setRejectModalVisible(true)}}>
                         <Text style={styles.buttonText}>REJECT</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.approveButton} onPress={() => setApproveModalVisible(true)}>
+                    <TouchableOpacity
+                        style={styles.approveButton}
+                        onPress={() => {
+                            console.log("Approve button clicked"); 
+                            setApproveModalVisible(true);
+                        }}
+                    >
                         <Text style={styles.buttonText}>APPROVE</Text>
                     </TouchableOpacity>
                 </View>
