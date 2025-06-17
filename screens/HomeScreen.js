@@ -1,3 +1,4 @@
+// Updated HomeScreen.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -7,6 +8,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
+import { useTheme } from './ThemeContext'; // Adjust path if needed
 
 const mockData = [
   {
@@ -67,33 +69,17 @@ const mockData = [
   },
   // add more mock entries if needed
 ];
+  // ...more items
 
-const lightTheme = {
-  background: '#fff',
-  text: '#000',
-  card: '#e6f0ff',
-  searchBg: '#f1f1f1',
-  badgeBg: '#d0e6ff',
-  badgeText: '#007bff',
-};
-
-const darkTheme = {
-  background: '#121212',
-  text: '#f2f2f2',
-  card: '#1e1e1e',
-  searchBg: '#1a1a1a',
-  badgeBg: '#2b2b2b',
-  badgeText: '#4da6ff',
-};
 
 const HomeScreen = ({ navigation }) => {
+  const { isDark, mode, setMode, colors } = useTheme();
   const [selectedTab, setSelectedTab] = useState('Pending');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const theme = isDarkMode ? darkTheme : lightTheme;
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'system' : 'light';
+    setMode(next);
   };
 
   useEffect(() => {
@@ -115,10 +101,12 @@ const HomeScreen = ({ navigation }) => {
   const renderHeader = () => (
     <View>
       <View style={styles.topBar}>
-        <Text style={[styles.headerText, { color: theme.text }]}>👋 Welcome, TEST AMPS</Text>
+        <Text style={[styles.headerText, { color: colors.text }]}>👋 Welcome, TEST AMPS</Text>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <TouchableOpacity onPress={toggleTheme}>
-            <Text style={{ color: theme.text, fontSize: 18 }}>🌓</Text>
+            <Text style={{ color: colors.text, fontSize: 18 }}>
+              {mode === 'light' ? '☀️' : mode === 'dark' ? '🌙' : '⚙️'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.replace('Login')}>
             <Text style={{ color: '#dc3545', fontWeight: 'bold' }}>Logout</Text>
@@ -129,30 +117,15 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.tabContainer}>
         {['Pending', 'Approved', 'Rejected'].map(tab => {
           const isActive = selectedTab === tab;
-          const backgroundColor =
-            isActive && tab === 'Pending' ? '#007bff' :
-              isActive && tab === 'Approved' ? '#28a745' :
-                isActive && tab === 'Rejected' ? '#dc3545' :
-                  'transparent';
-
-          const borderColor =
-            tab === 'Pending' ? '#007bff' :
-              tab === 'Approved' ? '#28a745' :
-                '#dc3545';
-
+          const backgroundColor = isActive ? (tab === 'Pending' ? '#007bff' : tab === 'Approved' ? '#28a745' : '#dc3545') : 'transparent';
+          const borderColor = tab === 'Pending' ? '#007bff' : tab === 'Approved' ? '#28a745' : '#dc3545';
           const textColor = isActive ? '#fff' : borderColor;
 
           return (
             <TouchableOpacity
               key={tab}
               onPress={() => setSelectedTab(tab)}
-              style={[
-                styles.tabButton,
-                {
-                  borderColor: borderColor,
-                  backgroundColor: backgroundColor,
-                }
-              ]}
+              style={[styles.tabButton, { borderColor, backgroundColor }]}
             >
               <Text style={[styles.tabText, { color: textColor }]}>{tab}</Text>
             </TouchableOpacity>
@@ -160,9 +133,9 @@ const HomeScreen = ({ navigation }) => {
         })}
       </View>
 
-      <View style={[styles.searchContainer, { backgroundColor: theme.searchBg }]}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.searchBg }]}>
         <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
+          style={[styles.searchInput, { color: colors.text }]}
           placeholder="Search by name, order no, or address..."
           placeholderTextColor="#888"
           value={searchQuery}
@@ -171,28 +144,24 @@ const HomeScreen = ({ navigation }) => {
         <Text style={[styles.refreshText, { color: '#007bff' }]}>⟳</Text>
       </View>
 
-      <Text style={[styles.totalText, { color: theme.text }]}>
-        Total Cases: {filteredData.length}
-      </Text>
+      <Text style={[styles.totalText, { color: colors.text }]}>Total Cases: {filteredData.length}</Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={filteredData}
         keyExtractor={item => item.orderNo}
         ListHeaderComponent={renderHeader}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => navigation.navigate('Details', { orderDetails: item })}>
-            <View style={[styles.card, { backgroundColor: theme.card }]}>
-              <Text style={[styles.orderNo, { color: theme.text }]}>Order No: {item.orderNo}</Text>
-              <Text style={[styles.name, { color: theme.text }]}>Applicant: {item.name}</Text>
-              <Text style={[styles.address, { color: theme.text }]}>{item.address}</Text>
-              <Text style={[styles.date, { color: theme.text }]}>Received: {item.date}</Text>
-              <Text style={[styles.badge, { backgroundColor: theme.badgeBg, color: theme.badgeText }]}>
-                🕒 {item.status}
-              </Text>
+            <View style={[styles.card, { backgroundColor: colors.card }]}>
+              <Text style={[styles.orderNo, { color: colors.text }]}>Order No: {item.orderNo}</Text>
+              <Text style={[styles.name, { color: colors.text }]}>Applicant: {item.name}</Text>
+              <Text style={[styles.address, { color: colors.text }]}>{item.address}</Text>
+              <Text style={[styles.date, { color: colors.text }]}>Received: {item.date}</Text>
+              <Text style={[styles.badge, { backgroundColor: colors.badgeBg, color: colors.badgeText }]}>🕒 {item.status}</Text>
             </View>
           </TouchableOpacity>
         )}

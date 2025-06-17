@@ -2,53 +2,22 @@ import React, { useState } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     ScrollView,
     Image,
     TouchableOpacity,
     LayoutAnimation,
-    Platform,
-    UIManager,
     Modal,
-    TextInput
+    TextInput,
 } from 'react-native';
-import styles from './DetailScreen.styling';
-import topImage from '../assets/electric_car.png';
+import getStyles from './DetailScreen.styling';
 import bijli_image from '../assets/BijliSevaKendra.png';
-import { useColorScheme } from 'react-native'; // Add this with your other imports
-
-const useThemedStyles = (isDark) => ({
-  background: {
-    backgroundColor: isDark ? '#121212' : '#ffffff',
-  },
-  text: {
-    color: isDark ? '#ffffff' : '#000000',
-  },
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: isDark ? '#ffffff' : '#000000',
-  },
-  toggleButton: {
-    padding: 10,
-    backgroundColor: isDark ? '#444' : '#ddd',
-    marginBottom: 10,
-    borderRadius: 8,
-  },
-  toggleButtonText: {
-    color: isDark ? '#fff' : '#000',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-});
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    // UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+import { useTheme } from '../screens/ThemeContext';
 
 const CollapsibleCard = ({ title, children, initialExpanded = true }) => {
-    const [expanded, setExpanded] = useState(initialExpanded);
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
+    const [expanded, setExpanded] = useState(initialExpanded);
     const toggleExpanded = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setExpanded(!expanded);
@@ -56,81 +25,29 @@ const CollapsibleCard = ({ title, children, initialExpanded = true }) => {
 
     return (
         <View style={styles.collapsibleContainer}>
-            <TouchableOpacity onPress={toggleExpanded} style={styles.collapsibleHeader} accessibilityRole="button" accessibilityLabel={`${title} section toggle`}>
-                <Text style={styles.collapsibleTitle}>{title}</Text>
-                <Text style={styles.toggleIcon}>{expanded ? '▲' : '▼'}</Text>
+            <TouchableOpacity onPress={toggleExpanded} style={styles.collapsibleHeader}>
+                <Text style={[styles.collapsibleTitle, { color: colors.text }]}>{title}</Text>
+                <Text style={[styles.toggleIcon, { color: colors.text }]}>{expanded ? '▲' : '▼'}</Text>
             </TouchableOpacity>
-            {expanded && (
-                <View style={styles.collapsibleContent}>
-                    {children}
-                </View>
-            )}
+            {expanded && <View style={styles.collapsibleContent}>{children}</View>}
         </View>
     );
 };
 
-const KeyValue = ({ label, value }) => (
-    <View style={styles.row}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
-    </View>
-);
-
-const CFDetailEntry = ({ entry, index }) => (
-    <View style={styles.cfEntryCard}>
-        <View style={styles.cfEntryHeader}>
-            <View style={styles.cfIndexCircle}>
-                <Text style={styles.cfIndexText}>{index + 1}</Text>
-            </View>
-            <View style={styles.cfHeaderContent}>
-                <View style={styles.cfHeaderRow}>
-                    <Text style={styles.cfHeaderLabel}>CA:</Text>
-                    <Text style={styles.cfHeaderValue}>{entry.ca}</Text>
-                </View>
-                <View style={styles.cfHeaderRow}>
-                    <Text style={styles.cfHeaderLabel}>Net OS Amt:</Text>
-                    <Text style={styles.cfHeaderValue}>₹ {entry.netOSAmt}</Text>
-                </View>
-            </View>
+const KeyValue = ({ label, value, color }) => {
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
+    return (
+        <View style={styles.row}>
+            <Text style={[styles.label, { color: color ?? colors.text }]}>{label}</Text>
+            <Text style={[styles.value, { color: color ?? colors.text }]}>{value}</Text>
         </View>
-        <View style={styles.cfEntryDetails}>
-            <KeyValue label="Name" value={entry.name} />
-            <KeyValue label="Address" value={entry.address} />
-            <KeyValue label="BP" value={entry.bp} />
-            <KeyValue label="Seq No" value={entry.seqNo} />
-            <KeyValue label="Move out Date" value={entry.moveOutDate} />
-            <KeyValue label="Consref" value={entry.consref} />
-            <KeyValue label="User Type" value={entry.userType} />
-            <KeyValue label="Check Enf." value={entry.checkEnf} />
-            <KeyValue label="CF Remarks" value={entry.cfRemarks} />
-        </View>
-    </View>
-);
-
-const MCDDetailEntry = ({ entry, index }) => (
-    <View style={styles.mcdEntryCard}>
-        <View style={styles.mcdEntryHeader}>
-            <View style={styles.mcdIndexCircle}>
-                <Text style={styles.mcdIndexText}>{index + 1}</Text>
-            </View>
-            <View style={styles.mcdHeaderContent}>
-                <Text style={styles.mcdHeaderLabel}>Name of Unit:</Text>
-                <Text style={styles.mcdHeaderValue}>{entry.nameOfUnit}</Text>
-            </View>
-        </View>
-        <View style={styles.mcdEntryDetails}>
-            <KeyValue label="Address of property" value={entry.addressOfProperty} />
-            <KeyValue label="A Letter Ref No" value={entry.aLetterRefNo} />
-            <KeyValue label="DRN No" value={entry.drnNo} />
-            <KeyValue label="Authority Name" value={entry.authorityName} />
-            <KeyValue label="MCD Status" value={entry.mcdStatus} />
-            <KeyValue label="Assigned To" value={entry.assignedTo} />
-            <KeyValue label="MCD Remarks" value={entry.mcdRemarks} />
-        </View>
-    </View>
-);
+    );
+};
 
 const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
     const [selectedReason, setSelectedReason] = useState(null);
     const [comment, setComment] = useState('');
     const [totalSelectedReasons, setTotalSelectedReasons] = useState(0);
@@ -142,65 +59,39 @@ const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
 
     const handleSubmit = () => {
         onSubmit({ selectedReason, comment });
-        onClose();
         setSelectedReason(null);
         setComment('');
         setTotalSelectedReasons(0);
+        onClose();
     };
 
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={visible}
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
                     <Text style={styles.modalTitle}>Reasons for Rejection</Text>
-
                     {['TF Deficiency', 'CF Deficiency', 'TF + CF Deficiency'].map((reason) => (
-                        <TouchableOpacity
-                            key={reason}
-                            style={styles.radioButtonContainer}
-                            onPress={() => handleReasonSelect(reason)}
-                            accessibilityRole="radio"
-                            accessibilityState={{ selected: selectedReason === reason }}
-                        >
+                        <TouchableOpacity key={reason} onPress={() => handleReasonSelect(reason)} style={styles.radioButtonContainer}>
                             <View style={styles.radioButton}>
                                 {selectedReason === reason && <View style={styles.radioButtonInner} />}
                             </View>
                             <Text style={styles.radioLabel}>{reason}</Text>
                         </TouchableOpacity>
                     ))}
-
                     <Text style={styles.totalReasonsText}>Total Selected Reasons = {totalSelectedReasons}</Text>
-
                     <TextInput
                         style={styles.commentInput}
                         placeholder="Write a comment..."
-                        multiline={true}
-                        numberOfLines={4}
+                        multiline
                         value={comment}
                         onChangeText={setComment}
                         textAlignVertical="top"
-                        accessibilityLabel="Rejection comment input"
                     />
-
                     <View style={styles.modalButtonsContainer}>
-                        <TouchableOpacity
-                            style={styles.modalBackButton}
-                            onPress={onClose}
-                            accessibilityRole="button"
-                        >
+                        <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
                             <Text style={styles.buttonText}>Back</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.modalSubmitButton}
-                            onPress={handleSubmit}
-                            accessibilityRole="button"
-                            disabled={!selectedReason}
-                        >
+                        <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!selectedReason}>
                             <Text style={[styles.buttonText, !selectedReason && { opacity: 0.5 }]}>Submit</Text>
                         </TouchableOpacity>
                     </View>
@@ -211,8 +102,9 @@ const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
 };
 
 const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
-    const [comment, setComment] = React.useState('');
-
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
+    const [comment, setComment] = useState('');
     const handleSubmit = () => {
         onSubmit(comment);
         setComment('');
@@ -220,44 +112,24 @@ const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
     };
 
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={onClose}
-            accessibilityViewIsModal={true}
-        >
+        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
                     <Text style={styles.modalTitle}>Enter Your Comment</Text>
-
                     <TextInput
+                        style={styles.commentInput}
                         placeholder="Write a comment..."
-                        multiline={true}
-                        numberOfLines={4}
+                        multiline
                         value={comment}
                         onChangeText={setComment}
                         textAlignVertical="top"
-                        accessibilityLabel="Approval comment input"
-                        style={styles.commentInput}
                     />
-
                     <View style={styles.modalButtonsContainer}>
-                        <TouchableOpacity
-                            onPress={onClose}
-                            style={styles.modalBackButton}
-                            accessibilityRole="button"
-                        >
+                        <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
                             <Text style={styles.buttonText}>Back</Text>
                         </TouchableOpacity>
-
-                        <TouchableOpacity
-                            onPress={handleSubmit}
-                            style={styles.modalSubmitButton}
-                            accessibilityRole="button"
-                            disabled={comment.trim() === ''}
-                        >
-                            <Text style={[styles.buttonText, comment.trim() === '' && { opacity: 0.5 }]}>Submit</Text>
+                        <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!comment.trim()}>
+                            <Text style={[styles.buttonText, !comment.trim() && { opacity: 0.5 }]}>Submit</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -267,8 +139,9 @@ const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
 };
 
 const TFrevisitModal = ({ visible, onClose, onSubmit }) => {
-    const [comment, setComment] = React.useState('');
-
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
+    const [comment, setComment] = useState('');
     const handleSubmit = () => {
         if (comment.trim()) {
             onSubmit(comment);
@@ -278,40 +151,24 @@ const TFrevisitModal = ({ visible, onClose, onSubmit }) => {
     };
 
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
                     <Text style={styles.modalTitle}>Enter TF Revisit Comment</Text>
-
                     <TextInput
+                        style={styles.commentInput}
                         placeholder="Write a comment..."
-                        multiline={true}
-                        numberOfLines={4}
+                        multiline
                         value={comment}
                         onChangeText={setComment}
                         textAlignVertical="top"
-                        style={styles.commentInput}
                     />
-
                     <View style={styles.modalButtonsContainer}>
-                        <TouchableOpacity
-                            onPress={onClose}
-                            style={styles.modalBackButton}
-                        >
+                        <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
                             <Text style={styles.buttonText}>Back</Text>
                         </TouchableOpacity>
-
-                        <TouchableOpacity
-                            onPress={handleSubmit}
-                            style={styles.modalSubmitButton}
-                            disabled={comment.trim() === ''}
-                        >
-                            <Text style={[styles.buttonText, comment.trim() === '' && { opacity: 0.5 }]}>Submit</Text>
+                        <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!comment.trim()}>
+                            <Text style={[styles.buttonText, !comment.trim() && { opacity: 0.5 }]}>Submit</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -320,12 +177,12 @@ const TFrevisitModal = ({ visible, onClose, onSubmit }) => {
     );
 };
 
-
 const DetailScreen = ({ route }) => {
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
     const [isRejectModalVisible, setRejectModalVisible] = useState(false);
     const [isApproveModalVisible, setApproveModalVisible] = useState(false);
     const [isTFRevisitVisible, setTFRevisitVisible] = useState(false);
-
 
     const data = route.params?.data || {
         // Same data as provided previously (omitted here for brevity)
@@ -459,20 +316,15 @@ const DetailScreen = ({ route }) => {
 
     return (
         <ScrollView style={styles.container}>
-            <Image
-                source={bijli_image}
-                style={styles.BijliSevaKendraImage}
-                resizeMode="contain"
-            />
+            <Image source={bijli_image} style={styles.BijliSevaKendraImage} resizeMode="contain" />
+            <Text style={styles.sectionTitle}>Order Info</Text>
 
-            {/* IR Section as Collapsible Card */}
-            <CollapsibleCard title="IR (New Connections Request Request)" initialExpanded={true}>
+            <CollapsibleCard title="Basic Details">
                 <KeyValue label="Order No." value={data.orderNo} />
-                <KeyValue label="Applicant Name" value={data.applicantName} />
-                <KeyValue label="Premises Address" value={data.premisesAddress} />
-                <KeyValue label="Division" value={data.division} />
-                <KeyValue label="Father's Name" value={data.fatherName} />
-                <KeyValue label="Order Date" value={data.orderDate} />
+                <KeyValue label="Name" value={data.applicantName} />
+                <KeyValue label="Address" value={data.premisesAddress} />
+                <KeyValue label="Date" value={data.orderDate} />
+                <KeyValue label="Status" value={data.statusWithOMList} />
             </CollapsibleCard>
 
             {/* Connection Details Section as Collapsible Card */}
@@ -540,39 +392,36 @@ const DetailScreen = ({ route }) => {
             </CollapsibleCard>
 
             {/* CF DETAILS Section as Collapsible Card */}
-            <CollapsibleCard title="CF DETAILS" initialExpanded={false}>
-                {data.cfDetails.map((entry, index) => (
-                    <CFDetailEntry key={index} entry={entry} index={index} />
+            <CollapsibleCard title="CF DETAILS" colors={colors}>
+                {Array.isArray(data.cfDetails) && data.cfDetails.map((entry, index) => (
+                    <View key={index} style={styles.cfEntryCard}>
+                        <KeyValue label="CA" value={entry.ca} color={colors.text} />
+                        <KeyValue label="Net OS Amt" value={entry.netOSAmt} color={colors.text} />
+                        <KeyValue label="Name" value={entry.name} color={colors.text} />
+                        <KeyValue label="Address" value={entry.address} color={colors.text} />
+                    </View>
                 ))}
             </CollapsibleCard>
 
             {/* MCD DETAILS Section as Collapsible Card */}
             <CollapsibleCard title="MCD DETAILS" initialExpanded={false}>
-                {data.mcdDetails.map((entry, index) => (
-                    <MCDDetailEntry key={index} entry={entry} index={index} />
+                {Array.isArray(data.mcdDetails) && data.mcdDetails.map((entry, index) => (
+                    <View key={index} style={styles.mcdEntryCard}>
+                        <KeyValue label="Name of Unit" value={entry.nameOfUnit} color={colors.text} />
+                        <KeyValue label="Address of Property" value={entry.addressOfProperty} color={colors.text} />
+                    </View>
                 ))}
             </CollapsibleCard>
-
+            {/* Action buttons and modals */}
             <View style={styles.tfRevisitContainer}>
-                <TouchableOpacity
-                style={styles.tfRevisitButton}
-                onPress={() => setTFRevisitVisible(true)}
-                >
-                <Text style={styles.tfRevisitTitle}>TF REVISIT</Text>
+                <TouchableOpacity style={styles.tfRevisitButton} onPress={() => setTFRevisitVisible(true)}>
+                    <Text style={styles.tfRevisitTitle}>TF REVISIT</Text>
                 </TouchableOpacity>
                 <View style={styles.tfRevisitButtons}>
-                    <TouchableOpacity
-                        style={styles.rejectButton}
-                        onPress={() => setRejectModalVisible(true)}
-                        accessibilityRole="button"
-                    >
+                    <TouchableOpacity style={styles.rejectButton} onPress={() => setRejectModalVisible(true)}>
                         <Text style={styles.buttonText}>REJECT</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.approveButton}
-                        onPress={() => setApproveModalVisible(true)}
-                        accessibilityRole="button"
-                    >
+                    <TouchableOpacity style={styles.approveButton} onPress={() => setApproveModalVisible(true)}>
                         <Text style={styles.buttonText}>APPROVE</Text>
                     </TouchableOpacity>
                 </View>
@@ -586,13 +435,11 @@ const DetailScreen = ({ route }) => {
                     setRejectModalVisible(false);
                 }}
             />
-
             <ApproveCommentModal
                 visible={isApproveModalVisible}
                 onClose={() => setApproveModalVisible(false)}
                 onSubmit={handleApproveSubmit}
             />
-
             <TFrevisitModal
                 visible={isTFRevisitVisible}
                 onClose={() => setTFRevisitVisible(false)}
@@ -601,11 +448,8 @@ const DetailScreen = ({ route }) => {
                     setTFRevisitVisible(false);
                 }}
             />
-
-
         </ScrollView>
     );
 };
 
 export default DetailScreen;
-
