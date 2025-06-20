@@ -8,7 +8,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-import { useTheme } from './ThemeContext'; // Adjust path if needed
+import { useTheme } from '../screens/ThemeContext';
 
 const mockData = [
   {
@@ -103,14 +103,14 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.topBar}>
         <Text style={[styles.headerText, { color: colors.text }]}>👋 Welcome, TEST AMPS</Text>
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <TouchableOpacity onPress={toggleTheme}>
+          {/* <TouchableOpacity onPress={toggleTheme}>
             <Text style={{ color: colors.text, fontSize: 18 }}>
               {mode === 'light' ? '☀️' : mode === 'dark' ? '🌙' : '⚙️'}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.replace('Login')}>
+          </TouchableOpacity> */}
+          {/* <TouchableOpacity onPress={() => navigation.replace('Login')}>
             <Text style={{ color: '#dc3545', fontWeight: 'bold' }}>Logout</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
 
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 70,
+    marginTop: 0,
     marginBottom: 16,
   },
   headerText: {

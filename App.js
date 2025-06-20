@@ -1,44 +1,54 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import 'react-native-gesture-handler'; 
+import { GestureHandlerRootView } from 'react-native-gesture-handler'; 
 import LoginScreen from './screens/LoginScreen';
 import ForgetScreen from './screens/ForgetScreen';
 import HomeScreen from './screens/HomeScreen';
 import DetailScreen from './screens/DetailScreen';
-import { ThemeProvider } from './screens/ThemeContext'; // ✅ Confirm path
-
+import { ThemeProvider } from './screens/ThemeContext'; 
+import DrawerNavigator from './Navigation/DrawerNavigator'; 
 import { enableScreens } from 'react-native-screens';
+
 enableScreens();
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <ThemeProvider> {/* ✅ Wrap everything in ThemeProvider */}
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Login">
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Forget"
-            component={ForgetScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Details"
-            component={DetailScreen}
-            options={{ headerShown: false }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}> 
+      <ThemeProvider> 
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="Login">
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Forget"
+              component={ForgetScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Details"
+              component={DetailScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+              name="DrawerNavigator" 
+              component={DrawerNavigator} 
+              options={{ headerShown: false }} 
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

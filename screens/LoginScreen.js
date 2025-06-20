@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-// import React, { useState } from 'react';
 import loginPage from '../assets/login_page_2.jpeg';
 import BijliSevaKendraImage_withoutBG from '../assets/BijliSevaKendra_withoutBG.png';
 import electric_car from '../assets/electric_car.png';
@@ -57,7 +56,7 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.forgot}>Forgot my password?</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home')}>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.replace('DrawerNavigator')}>
               <Text style={styles.buttonText}>SUBMIT</Text>
             </TouchableOpacity>
 
