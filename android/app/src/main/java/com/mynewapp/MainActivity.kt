@@ -3,13 +3,15 @@ package com.mynewapp
 import android.os.Bundle
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
-import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView // ✅ Gesture Handler
+import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView
 import com.facebook.react.ReactRootView
+import org.devio.rn.splashscreen.SplashScreen // ✅ Import SplashScreen
 
 class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(null) // ✅ Needed for react-native-screens
+    SplashScreen.show(this) // ✅ Show the splash screen
+    super.onCreate(null)    // ✅ Required for react-native-screens
   }
 
   override fun getMainComponentName(): String = "MyNewApp"
@@ -17,7 +19,7 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate {
     return object : ReactActivityDelegate(this, mainComponentName) {
       override fun createRootView(): ReactRootView {
-        return RNGestureHandlerEnabledRootView(this@MainActivity) // ✅ Wrap root view
+        return RNGestureHandlerEnabledRootView(this@MainActivity)
       }
     }
   }

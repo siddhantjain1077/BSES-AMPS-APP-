@@ -9,6 +9,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useTheme } from '../screens/ThemeContext';
+import { BackHandler, Alert } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+ 
 
 const mockData = [
   {
@@ -76,6 +79,34 @@ const HomeScreen = ({ navigation }) => {
   const { isDark, mode, setMode, colors } = useTheme();
   const [selectedTab, setSelectedTab] = useState('Pending');
   const [searchQuery, setSearchQuery] = useState('');
+
+    useFocusEffect(
+  React.useCallback(() => {
+    const onBackPress = () => {
+      Alert.alert(
+        'Exit App',
+        'Are you sure you want to exit?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => null,
+            style: 'cancel',
+          },
+          { text: 'Yes', onPress: () => BackHandler.exitApp() },
+        ],
+        { cancelable: false }
+      );
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      onBackPress
+    );
+
+    return () => backHandler.remove();
+  }, [])
+);
 
   const toggleTheme = () => {
     const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'system' : 'light';

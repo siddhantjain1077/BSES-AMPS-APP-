@@ -1,24 +1,29 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import 'react-native-gesture-handler'; 
-import { GestureHandlerRootView } from 'react-native-gesture-handler'; 
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import SplashScreen from 'react-native-splash-screen'; // ✅
 import LoginScreen from './screens/LoginScreen';
 import ForgetScreen from './screens/ForgetScreen';
 import HomeScreen from './screens/HomeScreen';
 import DetailScreen from './screens/DetailScreen';
-import { ThemeProvider } from './screens/ThemeContext'; 
-import DrawerNavigator from './Navigation/DrawerNavigator'; 
-import { enableScreens } from 'react-native-screens';
+import { ThemeProvider } from './screens/ThemeContext';
+import DrawerNavigator from './Navigation/DrawerNavigator';
 
+import { enableScreens } from 'react-native-screens';
 enableScreens();
 
+// ✅ Stack navigator created correctly
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  useEffect(() => {
+    SplashScreen.hide(); // ✅ Hide splash when JS is ready
+  }, []);
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}> 
-      <ThemeProvider> 
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Login">
             <Stack.Screen
@@ -41,10 +46,10 @@ export default function App() {
               component={DetailScreen}
               options={{ headerShown: false }}
             />
-            <Stack.Screen 
-              name="DrawerNavigator" 
-              component={DrawerNavigator} 
-              options={{ headerShown: false }} 
+            <Stack.Screen
+              name="DrawerNavigator"
+              component={DrawerNavigator}
+              options={{ headerShown: false }}
             />
           </Stack.Navigator>
         </NavigationContainer>
