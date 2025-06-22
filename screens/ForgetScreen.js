@@ -1,52 +1,60 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+} from 'react-native';
+import bgImage from '../assets/change_password.png'; // update path if needed
 
 const ForgetScreen = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Change Password</Text>
+    <ImageBackground source={bgImage} style={styles.background} resizeMode="cover">
+      <View style={styles.container}>
+        <Text style={styles.heading}>Change Password</Text>
 
-      <Text style={styles.label}>Enter your UID</Text>
-      <TextInput
-        placeholder="UID or Email"
-        placeholderTextColor="#888"
-        style={styles.input}
-        keyboardType="email-address"
-      />
+        <Text style={styles.label}>Enter your UID</Text>
+        <TextInput
+          placeholder="UID or Email"
+          placeholderTextColor="#000"
+          style={styles.input}
+          keyboardType="email-address"
+        />
 
-      <Text style={styles.label}>Enter Old Password</Text>
-      <TextInput
-        placeholder="Username"
-        placeholderTextColor="#888"
-        style={styles.input}
-      />
+        <Text style={styles.label}>Enter Old Password</Text>
+        <TextInput
+          placeholder="Username"
+          placeholderTextColor="#000"
+          style={styles.input}
+        />
 
-      <Text style={styles.label}>Enter new password</Text>
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#888"
-        style={styles.input}
-        secureTextEntry
-      />
+        <Text style={styles.label}>Enter new password</Text>
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#000"
+          style={styles.input}
+          secureTextEntry
+        />
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>SUBMIT</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>SUBMIT</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 };
 
 export default ForgetScreen;
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#0B1547',
+    backgroundColor: 'rgba(25, 27, 116, 0.7)', // semi-transparent fallback
     justifyContent: 'center',
     alignItems: 'center',
     padding: 15,
@@ -60,15 +68,16 @@ const styles = StyleSheet.create({
   label: {
     color: '#FFFFFF',
     fontSize: 16,
+    placeholderTextColor: 'fff',
     marginBottom: 10,
     alignSelf: 'flex-start',
   },
   input: {
     width: '100%',
-    backgroundColor: '#333',
+    backgroundColor: '#ffffff',
     padding: 12,
     borderRadius: 8,
-    color: '#fff',
+    color: '#000',
     marginBottom: 20,
   },
   button: {

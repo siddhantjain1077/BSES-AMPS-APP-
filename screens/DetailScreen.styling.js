@@ -49,6 +49,37 @@ const getStyles = (colors, isDark) =>
       shadowOpacity: 0.1,
       shadowRadius: 3,
     },
+    radioButtonContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 8,
+    },
+    radioButton: {
+      height: 20,
+      width: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: colors.primary ?? '#007ACC',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 10,
+    },
+    radioButtonInner: {
+      height: 10,
+      width: 10,
+      borderRadius: 5,
+      backgroundColor: colors.primary ?? '#007ACC',
+    },
+    radioLabel: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    totalReasonsText: {
+      marginVertical: 10,
+      fontStyle: 'italic',
+      color: colors.text,
+    },
+
     collapsibleHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -177,8 +208,8 @@ const getStyles = (colors, isDark) =>
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 999,         // ✅ this
-      elevation: 10,       // ✅ for Android
+      zIndex: 999,        
+      elevation: 10,     
     },
     modalView: {
       backgroundColor: colors.card,

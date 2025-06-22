@@ -420,7 +420,7 @@ const DetailScreen = ({ route }) => {
             </CollapsibleCard>
             {/* Action buttons and modals */}
             <View style={styles.tfRevisitContainer}>
-                <TouchableOpacity style={styles.tfRevisitButton} onPress={() => 
+                <TouchableOpacity style={styles.tfRevisitButtons} onPress={() => 
                     setTFRevisitVisible(true)}>
                     <Text style={styles.tfRevisitTitle}>TF REVISIT</Text>
                 </TouchableOpacity>

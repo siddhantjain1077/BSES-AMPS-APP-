@@ -87,14 +87,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     // paddingVertical: 30,
-    paddingTop: 30,
-
+    paddingTop: 0,
+    // marginBottom: 0,
   },
   centerContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     flexGrow: 1,
-    marginBottom: 120
+    marginBottom: 60
   },
   logoBox: {
     backgroundColor: 'rgba(255,255,255,0.8)',
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderColor: 'white',
     borderWidth: 1,
+    // margintop: 20,
   },
   title: {
     color: 'white',
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
 
   funkyImage: {
     width: '100%',
-    height: 150,
+    height: 145,
   },
   logoText: {
     color: '#0B1547',
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
   BijliSevaKendraImage: {
   width: '100%',
   height: 180,
-  marginBottom: 12,
+  // marginBottom: 0,
   marginTop: 110, 
   borderRadius: 40,
   textAlign: 'center',
