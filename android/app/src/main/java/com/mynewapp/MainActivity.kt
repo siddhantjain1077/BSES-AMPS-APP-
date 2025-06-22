@@ -5,13 +5,12 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView
 import com.facebook.react.ReactRootView
-import org.devio.rn.splashscreen.SplashScreen // ✅ Import SplashScreen
-
+import org.devio.rn.splashscreen.SplashScreen 
 class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    SplashScreen.show(this) // ✅ Show the splash screen
-    super.onCreate(null)    // ✅ Required for react-native-screens
+    SplashScreen.show(this) 
+    super.onCreate(null)    
   }
 
   override fun getMainComponentName(): String = "MyNewApp"
