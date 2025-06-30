@@ -2,23 +2,22 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import SplashScreen from 'react-native-splash-screen'; // ✅
+import SplashScreen from 'react-native-splash-screen';
 import LoginScreen from './screens/LoginScreen';
 import ForgetScreen from './screens/ForgetScreen';
 import HomeScreen from './screens/HomeScreen';
 import DetailScreen from './screens/DetailScreen';
 import { ThemeProvider } from './screens/ThemeContext';
 import DrawerNavigator from './Navigation/DrawerNavigator';
-
 import { enableScreens } from 'react-native-screens';
+// import LoginDebugger from './Services/api';
 enableScreens();
 
-// ✅ Stack navigator created correctly
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   useEffect(() => {
-    SplashScreen.hide(); // ✅ Hide splash when JS is ready
+    SplashScreen.hide();
   }, []);
 
   return (

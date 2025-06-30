@@ -11,5 +11,5 @@
         android:src="@drawable/custom_splash"
         android:scaleType="centerInside"
         android:adjustViewBounds="true"
-        android:contentDescription="Splash logo" />
+ />
 </RelativeLayout>

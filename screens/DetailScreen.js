@@ -1,470 +1,329 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    View,
-    Text,
-    ScrollView,
-    Image,
-    TouchableOpacity,
-    LayoutAnimation,
-    Modal,
-    TextInput,
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  LayoutAnimation,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import getStyles from '../screens/DetailScreen.styling';
 import { useTheme } from '../screens/ThemeContext';
 import bijliLight from '../assets/Bijli_kendra_white.png';
 import bijliDark from '../assets/BijliSevaKendra_withoutBG.png';
+import { postRequest, VIEW_PENDING_URL } from '../Services/api';
 
+const CollapsibleCard = ({ title, children, initialExpanded = false }) => {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors, isDark);
+  const [expanded, setExpanded] = useState(initialExpanded);
 
-const CollapsibleCard = ({ title, children, initialExpanded = true }) => {
-    const { colors, isDark } = useTheme();
-    const styles = getStyles(colors, isDark);
+  const toggleExpanded = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded(!expanded);
+  };
 
-    const [expanded, setExpanded] = useState(initialExpanded);
-    const toggleExpanded = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setExpanded(!expanded);
-    };
-
-    return (
-        <View style={styles.collapsibleContainer}>
-            <TouchableOpacity onPress={toggleExpanded} style={styles.collapsibleHeader}>
-                <Text style={[styles.collapsibleTitle, { color: colors.text }]}>{title}</Text>
-                <Text style={[styles.toggleIcon, { color: colors.text }]}>{expanded ? '▲' : '▼'}</Text>
-            </TouchableOpacity>
-            {expanded && <View style={styles.collapsibleContent}>{children}</View>}
-        </View>
-    );
+  return (
+    <View style={styles.collapsibleContainer}>
+      <TouchableOpacity onPress={toggleExpanded} style={styles.collapsibleHeader}>
+        <Text style={[styles.collapsibleTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.toggleIcon, { color: colors.text }]}>{expanded ? '▲' : '▼'}</Text>
+      </TouchableOpacity>
+      {expanded && <View style={styles.collapsibleContent}>{children}</View>}
+    </View>
+  );
 };
 
-const KeyValue = ({ label, value, color }) => {
-    const { colors, isDark } = useTheme();
-    const styles = getStyles(colors, isDark);
-    return (
-        <View style={styles.row}>
-            <Text style={[styles.label, { color: color ?? colors.text }]}>{label}</Text>
-            <Text style={[styles.value, { color: color ?? colors.text }]}>{value}</Text>
-        </View>
-    );
+const KeyValue = ({ label, value }) => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+  return (
+    <View style={styles.row}>
+      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+      <Text style={[styles.value, { color: colors.text }]}>{value || '-'}</Text>
+    </View>
+  );
 };
 
 const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
-    const { colors, isDark } = useTheme();
-    const styles = getStyles(colors, isDark);
-    const [selectedReason, setSelectedReason] = useState(null);
-    const [comment, setComment] = useState('');
-    const [totalSelectedReasons, setTotalSelectedReasons] = useState(0);
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+  const [selectedReason, setSelectedReason] = useState(null);
+  const [comment, setComment] = useState('');
 
-    const handleReasonSelect = (reason) => {
-        setSelectedReason(reason);
-        setTotalSelectedReasons(reason ? 1 : 0);
-    };
+  const handleSubmit = () => {
+    onSubmit({ selectedReason, comment });
+    setSelectedReason(null);
+    setComment('');
+    onClose();
+  };
 
-    const handleSubmit = () => {
-        onSubmit({ selectedReason, comment });
-        setSelectedReason(null);
-        setComment('');
-        setTotalSelectedReasons(0);
-        onClose();
-    };
-
-    return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-            <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                    <Text style={styles.modalTitle}>Reasons for Rejection</Text>
-                    {['TF Deficiency', 'CF Deficiency', 'TF + CF Deficiency'].map((reason) => (
-                        <TouchableOpacity key={reason} onPress={() => handleReasonSelect(reason)} style={styles.radioButtonContainer}>
-                            <View style={styles.radioButton}>
-                                {selectedReason === reason && <View style={styles.radioButtonInner} />}
-                            </View>
-                            <Text style={styles.radioLabel}>{reason}</Text>
-                        </TouchableOpacity>
-                    ))}
-                    <Text style={styles.totalReasonsText}>Total Selected Reasons = {totalSelectedReasons}</Text>
-                    <TextInput
-                        style={styles.commentInput}
-                        placeholder="Write a comment..."
-                        multiline
-                        value={comment}
-                        onChangeText={setComment}
-                        textAlignVertical="top"
-                    />
-                    <View style={styles.modalButtonsContainer}>
-                        <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
-                            <Text style={styles.buttonText}>Back</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!selectedReason}>
-                            <Text style={[styles.buttonText, !selectedReason && { opacity: 0.5 }]}>Submit</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    );
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Reasons for Rejection</Text>
+          {['TF Deficiency', 'CF Deficiency', 'TF + CF Deficiency'].map((reason) => (
+            <TouchableOpacity key={reason} onPress={() => setSelectedReason(reason)} style={styles.radioButtonContainer}>
+              <View style={styles.radioButton}>
+                {selectedReason === reason && <View style={styles.radioButtonInner} />}
+              </View>
+              <Text style={styles.radioLabel}>{reason}</Text>
+            </TouchableOpacity>
+          ))}
+          <TextInput style={styles.commentInput} placeholder="Write a comment..." multiline value={comment} onChangeText={setComment} textAlignVertical="top" />
+          <View style={styles.modalButtonsContainer}>
+            <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
+              <Text style={styles.buttonText}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!selectedReason}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 };
 
 const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
-    const { colors, isDark } = useTheme();
-    const styles = getStyles(colors, isDark);
-    const [comment, setComment] = useState('');
-    const handleSubmit = () => {
-        onSubmit(comment);
-        setComment('');
-        onClose();
-    };
-
-    return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-            <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                    <Text style={styles.modalTitle}>Enter Your Comment</Text>
-                    <TextInput
-                        style={styles.commentInput}
-                        placeholder="Write a comment..."
-                        multiline
-                        value={comment}
-                        onChangeText={setComment}
-                        textAlignVertical="top"
-                    />
-                    <View style={styles.modalButtonsContainer}>
-                        <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
-                            <Text style={styles.buttonText}>Back</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!comment.trim()}>
-                            <Text style={[styles.buttonText, !comment.trim() && { opacity: 0.5 }]}>Submit</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    );
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+  const [comment, setComment] = useState('');
+  const handleSubmit = () => {
+    onSubmit(comment);
+    setComment('');
+    onClose();
+  };
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Enter Your Comment</Text>
+          <TextInput style={styles.commentInput} placeholder="Write a comment..." multiline value={comment} onChangeText={setComment} textAlignVertical="top" />
+          <View style={styles.modalButtonsContainer}>
+            <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
+              <Text style={styles.buttonText}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!comment.trim()}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 };
 
 const TFrevisitModal = ({ visible, onClose, onSubmit }) => {
-    const { colors, isDark } = useTheme();
-    const styles = getStyles(colors, isDark);
-    const [comment, setComment] = useState('');
-    const handleSubmit = () => {
-        if (comment.trim()) {
-            onSubmit(comment);
-            setComment('');
-            onClose();
-        }
-    };
-
-    return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-            <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                    <Text style={styles.modalTitle}>Enter TF Revisit Comment</Text>
-                    <TextInput
-                        style={styles.commentInput}
-                        placeholder="Write a comment..."
-                        multiline
-                        value={comment}
-                        onChangeText={setComment}
-                        textAlignVertical="top"
-                    />
-                    <View style={styles.modalButtonsContainer}>
-                        <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
-                            <Text style={styles.buttonText}>Back</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!comment.trim()}>
-                            <Text style={[styles.buttonText, !comment.trim() && { opacity: 0.5 }]}>Submit</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    );
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+  const [comment, setComment] = useState('');
+  const handleSubmit = () => {
+    if (comment.trim()) {
+      onSubmit(comment);
+      setComment('');
+      onClose();
+    }
+  };
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Enter TF Revisit Comment</Text>
+          <TextInput style={styles.commentInput} placeholder="Write a comment..." multiline value={comment} onChangeText={setComment} textAlignVertical="top" />
+          <View style={styles.modalButtonsContainer}>
+            <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
+              <Text style={styles.buttonText}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!comment.trim()}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 };
 
-const DetailScreen = ({ route }) => {
-    const { colors, isDark } = useTheme();
-    const styles = getStyles(colors, isDark);
-    const [isRejectModalVisible, setRejectModalVisible] = useState(false);
-    const [isApproveModalVisible, setApproveModalVisible] = useState(false);
-    const [isTFRevisitVisible, setTFRevisitVisible] = useState(false);
+const DetailScreen = () => {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors, isDark);
+  const [isRejectModalVisible, setRejectModalVisible] = useState(false);
+  const [isApproveModalVisible, setApproveModalVisible] = useState(false);
+  const [isTFRevisitVisible, setTFRevisitVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
 
-    const data = route.params?.data || {
-        // Same data as provided previously (omitted here for brevity)
-        orderNo: '008007158358',
-        applicantName: 'SWATI . DEVI',
-        premisesAddress: 'QTR. 806 SEC-1, R K PURAM NEW DELHI . 1ST FLOOR TYPE-2 DELHI 110022',
-        division: 'S2RKP',
-        fatherName: 'W/O SH.ANKIT KUMAR',
-        orderDate: '30/08/2024 09:38:12 AM',
+  const route = useRoute();
+  const { orderDetails } = route.params || {};
 
-        appliedCategory: 'Domestic',
-        typeOfBuilding: 'Non-Residential',
-        connectionType: 'U01',
-        loadKW: '3.00',
-        feederPillarNo: 'RKPS941',
-        representativeAvailability: 'Yes',
+  useEffect(() => {
+    console.log('[🧭 route.params]', route.params);
+    console.log('[🧾 orderDetails]', orderDetails);
 
-        selectedByMMG: '2550RKP-VVR008A-1',
-        nearByCA: '154089824',
-        peakLoad: '80.18',
-        statusWithOMList: 'DT Unmatched',
-        listOfDTSelectedByOM: 'N/A',
+    const fetchDetailData = async () => {
+      if (!orderDetails) {
+        Alert.alert('Error', 'No order details received.');
+        setLoading(false);
+        return;
+      }
 
-        systemLocalityType: 'Cooperative Group Housing Society',
-        tfAreaType: 'Electrified',
-        supplyTypePhase: '1-Ph',
-        tfStructureOfPremises: 'Vacant Land',
-        tfNatureOfUse: 'DJB',
-        tfCableSize: '2X25LT',
-        cableType: 'Loop (2)',
-        serviceLineLength: '21',
-        rcpRequired: 'Yes',
-        tfBusBarType: 'Yes',
-        wiringCompleted: 'Yes',
-        subStationSpaceRequired: 'Yes',
-        wiringTestReportVerified: 'Yes',
-        existingMeterNo: 'N/A',
+      const { orderNo, division, zdin } = orderDetails;
+      const payload = { orderNo, division, zdin };
 
-        dwellingUnitWithSeparateEntry: 'Yes',
-        enforcementLead: 'Theft',
-        commonAreaParkingStatusStilt: 'Yes',
-        encroachment: 'Yes',
-        liftStatus: 'Install',
-        liftCertificate: 'Yes',
-        liftAffidavit: 'Yes',
-        plotAreaSqm: '41',
-        coveredAreaSqm: '21',
-        poleOverloadedHazardous: 'Yes',
-        longServiceLine: 'Yes',
-        underHTLTLine: 'Yes',
-        mmgRemark: 'Test remark',
+      try {
+        const response = await postRequest(VIEW_PENDING_URL, payload);
 
-        safeMeterSpace: 'Yes',
-        separateRoomAvailableForMeterInstallation: 'Yes',
-        outsideProjectionWallCreatedForMeterInstallation: 'Yes',
-        spaceAvailableForMeterInstallationOutsidePremises: 'Yes',
-        sufficientSpaceAvailableAtParkingAreaWithIsolation: 'Yes',
-        separateEscapeRouteAvailableAtSite: 'Yes',
-        meterPanelAsPerListedSpecification: 'Yes',
-        privateBusBar: 'Yes',
-        mcbAvailable: 'Yes',
-        elcbAvailable: 'Yes',
-
-        cfDetails: [
-            {
-                ca: 'NA',
-                netOSAmt: '',
-                name: '',
-                address: '1-C Sector 1 RK Puram,',
-                bp: 'NA',
-                seqNo: '1000/Legacy / RKP/71',
-                moveOutDate: 'NA',
-                consref: 'NA',
-                userType: 'Beneficiary',
-                checkEnf: 'Non Related',
-                cfRemarks: 'NA',
-            },
-            {
-                ca: 'NA',
-                netOSAmt: '',
-                name: 'N.A .',
-                address: '1-C , Sector-1 , R . K . Puram , New Delhi .',
-                bp: 'NA',
-                seqNo: 'DRN 2022|01 | 4842',
-                moveOutDate: 'NA',
-                consref: 'NA',
-                userType: 'Suspected Case',
-                checkEnf: 'Non Related',
-                cfRemarks: 'Tester 1234',
-            },
-        ],
-
-        mcdDetails: [
-            {
-                nameOfUnit: 'N/A',
-                addressOfProperty: 'House No . 14 , Ground Floor , Satya Niketan , New Delhi-110021 .',
-                aLetterRefNo: 'F . No . DPCC/OA-958/2019 / CMC-IV/2020/4099-4103',
-                drnNo: 'DRN|2020|01|1500',
-                authorityName: 'DPCC',
-                mcdStatus: 'Beneficiary',
-                assignedTo: 'NA',
-                mcdRemarks: 'NA',
-            },
-            {
-                nameOfUnit: 'N.A .',
-                addressOfProperty: '294 , Second Floor , Satyr Niketan , New Delhi-110021 .',
-                aLetterRefNo: 'F . No . DPCC/OA-958/2019 / CMC-IV/2020/4381-4385',
-                drnNo: 'DRN|2020|06|1746',
-                authorityName: 'DPCC',
-                mcdStatus: 'Suspected Case',
-                assignedTo: 'NA',
-                mcdRemarks: 'Test1234',
-            },
-            {
-                nameOfUnit: 'N.A .',
-                addressOfProperty: '95 , Ground Floor , Satya Niketan , New Delhi-110021 .',
-                aLetterRefNo: 'F . No . DPCC/OA-958/2019 / CMC-IV/2020/4281-4285',
-                drnNo: 'DRN|2020|06|1767',
-                authorityName: 'DPCC',
-                mcdStatus: 'Suspected Case',
-                assignedTo: 'NA',
-                mcdRemarks: 'Test111',
-            },
-        ]
+        if (response.success && response.data) {
+          setData(response.data);
+        } else {
+          console.warn('[❌ API Failed]', response.message || 'No data received');
+          Alert.alert('Error', response.message || 'Data fetch failed');
+        }
+      } catch (error) {
+        console.error('[Fetch Error]', error);
+        Alert.alert('Error', 'Failed to fetch data');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleApproveSubmit = (comment) => {
-        console.log('Approved with comment:', comment);
-        setApproveModalVisible(false);
-    };
+    fetchDetailData();
+  }, []);
 
+  if (loading) {
     return (
-        <ScrollView style={styles.container}>
-            <Image
-                source={isDark ? bijliDark : bijliLight}
-                style={styles.BijliSevaKendraImage}
-                resizeMode="contain"
-            />
-            <Text style={styles.sectionTitle}>Order Info :</Text>
-
-            <CollapsibleCard title="Basic Details">
-                <KeyValue label="Order No." value={data.orderNo} />
-                <KeyValue label="Name" value={data.applicantName} />
-                <KeyValue label="Address" value={data.premisesAddress} />
-                <KeyValue label="Date" value={data.orderDate} />
-                <KeyValue label="Status" value={data.statusWithOMList} />
-            </CollapsibleCard>
-
-            {/* Connection Details Section as Collapsible Card */}
-            <CollapsibleCard title="Connection Details" initialExpanded={false}>
-                <KeyValue label="Applied Category" value={data.appliedCategory} />
-                <KeyValue label="Type of Building" value={data.typeOfBuilding} />
-                <KeyValue label="Connection Type" value={data.connectionType} />
-                <KeyValue label="Load (KW)" value={data.loadKW} />
-                <KeyValue label="Pole/Feeder Pillar No." value={data.feederPillarNo} />
-                <KeyValue label="Representative Availability" value={data.representativeAvailability} />
-            </CollapsibleCard>
-
-            {/* Parameters for DT Selected by MMG Section as Collapsible Card */}
-            <CollapsibleCard title="Parameters for DT Selected by MMG" initialExpanded={false}>
-                <KeyValue label="Selected by MMG" value={data.selectedByMMG} />
-                <KeyValue label="Near by CA" value={data.nearByCA} />
-                <KeyValue label="Peak Load" value={data.peakLoad} />
-                <KeyValue label="Status With O&M List" value={data.statusWithOMList} />
-                <KeyValue label="List of DT Selected by O&M" value={data.listOfDTSelectedByOM} />
-            </CollapsibleCard>
-
-            {/* TF Details Punched by MMG Section as Collapsible Card */}
-            <CollapsibleCard title="TF Details Punched by MMG" initialExpanded={false}>
-                <KeyValue label="System Locality Type" value={data.systemLocalityType} />
-                <KeyValue label="TF Area Type" value={data.tfAreaType} />
-                <KeyValue label="Supply Type Phase" value={data.supplyTypePhase} />
-                <KeyValue label="TF Structure of Premises" value={data.tfStructureOfPremises} />
-                <KeyValue label="TF Nature of Use" value={data.tfNatureOfUse} />
-                <KeyValue label="TF Cable Size (Existing)" value={data.tfCableSize} />
-                <KeyValue label="Cable Type" value={data.cableType} />
-                <KeyValue label="Service Line Length (Mtr)" value={data.serviceLineLength} />
-                <KeyValue label="RCP Required" value={data.rcpRequired} />
-                <KeyValue label="TF Bus Bar Type" value={data.tfBusBarType} />
-                <KeyValue label="Wiring Completed" value={data.wiringCompleted} />
-                <KeyValue label="Sub Station Space Required" value={data.subStationSpaceRequired} />
-                <KeyValue label="Wiring Test Report Verified" value={data.wiringTestReportVerified} />
-                <KeyValue label="Existing Meter No" value={data.existingMeterNo} />
-                <KeyValue label="Dwelling Unit With Separate Entry" value={data.dwellingUnitWithSeparateEntry} />
-                <KeyValue label="Enforcement Lead" value={data.enforcementLead} />
-                <KeyValue label="Common Area/Parking Status/Stilt" value={data.commonAreaParkingStatusStilt} />
-                <KeyValue label="Encroachment" value={data.encroachment} />
-                <KeyValue label="Lift Status" value={data.liftStatus} />
-                <KeyValue label="Lift Certificate" value={data.liftCertificate} />
-                <KeyValue label="Lift Affidavit" value={data.liftAffidavit} />
-                <KeyValue label="Plot Area (Sqm)" value={data.plotAreaSqm} />
-                <KeyValue label="Covered Area (Sqm)" value={data.coveredAreaSqm} />
-                <KeyValue label="Pole Overloaded / Hazardous" value={data.poleOverloadedHazardous} />
-                <KeyValue label="Long Service Line" value={data.longServiceLine} />
-                <KeyValue label="Under HT/LT Line" value={data.underHTLTLine} />
-                <KeyValue label="MMG Remark" value={data.mmgRemark} />
-            </CollapsibleCard>
-
-            {/* SAFETY METER DETAILS Section as Collapsible Card */}
-            <CollapsibleCard title="SAFETY METER DETAILS" initialExpanded={false}>
-                <KeyValue label="Safe meter space" value={data.safeMeterSpace} />
-                <KeyValue label="Separate room available for meter installation" value={data.separateRoomAvailableForMeterInstallation} />
-                <KeyValue label="Outside projection wall created for meter installation" value={data.outsideProjectionWallCreatedForMeterInstallation} />
-                <KeyValue label="Space available for meter installation outside the premises" value={data.spaceAvailableForMeterInstallationOutsidePremises} />
-                <KeyValue label="Sufficient space available at parking area with isolation" value={data.sufficientSpaceAvailableAtParkingAreaWithIsolation} />
-                <KeyValue label="Separate escape route available at site" value={data.separateEscapeRouteAvailableAtSite} />
-                <KeyValue label="Meter Panel as per listed specification" value={data.meterPanelAsPerListedSpecification} />
-                <KeyValue label="Private BusBar" value={data.privateBusBar} />
-                <KeyValue label="MCB Available" value={data.mcbAvailable} />
-                <KeyValue label="ELCB Available" value={data.elcbAvailable} />
-            </CollapsibleCard>
-
-            {/* CF DETAILS Section as Collapsible Card */}
-            <CollapsibleCard title="CF DETAILS">
-                {Array.isArray(data.cfDetails) && data.cfDetails.map((entry, index) => (
-                    <React.Fragment key={index}>
-                        <KeyValue label="CA" value={entry.ca} />
-                        <KeyValue label="Net OS Amt" value={entry.netOSAmt} />
-                        <KeyValue label="Name" value={entry.name} />
-                        <KeyValue label="Address" value={entry.address} />
-                    </React.Fragment>
-                ))}
-            </CollapsibleCard>
-
-            {/* MCD DETAILS Section as Collapsible Card */}
-            <CollapsibleCard title="MCD DETAILS" initialExpanded={false}>
-                {Array.isArray(data.mcdDetails) && data.mcdDetails.map((entry, index) => (
-                    <React.Fragment key={index}>
-                        <KeyValue label="Name of Unit" value={entry.nameOfUnit} color={colors.text} />
-                        <KeyValue label="Address of Property" value={entry.addressOfProperty} color={colors.text} />
-                    </React.Fragment>
-                ))}
-            </CollapsibleCard>
-            {/* Action buttons and modals */}
-            <View style={styles.tfRevisitContainer}>
-                <TouchableOpacity style={styles.tfRevisitButtons} onPress={() => 
-                    setTFRevisitVisible(true)}>
-                    <Text style={styles.tfRevisitTitle}>TF REVISIT</Text>
-                </TouchableOpacity>
-                <View style={styles.tfRevisitButtons}>
-                    <TouchableOpacity style={styles.rejectButton} onPress={() => {
-                        console.log("Reject Button Clicked");
-                        setRejectModalVisible(true)}}>
-                        <Text style={styles.buttonText}>REJECT</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.approveButton}
-                        onPress={() => {
-                            console.log("Approve button clicked"); 
-                            setApproveModalVisible(true);
-                        }}
-                    >
-                        <Text style={styles.buttonText}>APPROVE</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            <RejectReasonModal
-                visible={isRejectModalVisible}
-                onClose={() => setRejectModalVisible(false)}
-                onSubmit={(data) => {
-                    console.log('Rejected with:', data);
-                    setRejectModalVisible(false);
-                }}
-            />
-            <ApproveCommentModal
-                visible={isApproveModalVisible}
-                onClose={() => setApproveModalVisible(false)}
-                onSubmit={handleApproveSubmit}
-            />
-            <TFrevisitModal
-                visible={isTFRevisitVisible}
-                onClose={() => setTFRevisitVisible(false)}
-                onSubmit={(comment) => {
-                    console.log('TF Revisit Comment:', comment);
-                    setTFRevisitVisible(false);
-                }}
-            />
-        </ScrollView>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
     );
+  }
+
+  if (!data) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: colors.text, textAlign: 'center', marginTop: 50 }}>
+          No data found for this request.
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container}>
+      <Image source={isDark ? bijliDark : bijliLight} style={styles.BijliSevaKendraImage} resizeMode="contain" />
+      <Text style={styles.sectionTitle}>Order Info:</Text>
+
+      <CollapsibleCard title="Basic Details" initialExpanded>
+        <KeyValue label="Order No." value={data.orderNo} />
+        <KeyValue label="Name" value={data.name} />
+        <KeyValue label="Father's Name" value={data.fatherName} />
+        <KeyValue label="Mobile No." value={data.mobileNo} />
+        <KeyValue label="Address" value={data.address} />
+        <KeyValue label="Order Date" value={data.orderDate} />
+        <KeyValue label="Division" value={data.division} />
+        <KeyValue label="ZDIN" value={data.zdin} />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Connection Details">
+        <KeyValue label="Category" value={data.categoryName} />
+        <KeyValue label="Request Type" value={data.requestType} />
+        <KeyValue label="Applied Load (KW)" value={data.appliedloadinkw} />
+        <KeyValue label="Meter Type" value={data.meterType} />
+        <KeyValue label="Connection Phase" value={data.supplytypE_PHASE} />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Infrastructure">
+        <KeyValue label="Safe Meter Space" value={data.safemeterspace} />
+        <KeyValue label="Wiring Completed" value={data.wirinG_COMPLETED} />
+        <KeyValue label="Lift Status" value={data.liftstatus} />
+        <KeyValue label="Lift Certificate" value={data.lifT_CERTIFICATE_REQUIRED} />
+        <KeyValue label="Cable Type" value={data.cablE_TYPE} />
+        <KeyValue label="Cable Size" value={data.cablE_SIZE} />
+        <KeyValue label="Service Line Length" value={data.servicE_LINE_LENGTH} />
+        <KeyValue label="Meter Panel" value={data.meteR_PANEL} />
+        <KeyValue label="Meter Location" value={data.meteR_LOCATION} />
+        <KeyValue label="Outside Meter Projection" value={data.outsidE_MTR_PROJECTION} />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Enforcement & Safety">
+        <KeyValue label="Enforcement Lead" value={data.enforcementlead} />
+        <KeyValue label="Under HT/LT Line" value={data.undeR_HT_LT_LINE} />
+        <KeyValue label="Pole Overloaded/Hazardous" value={data.ispolehazardous} />
+        <KeyValue label="Private Bus Bar" value={data.privatE_BUS_BAR} />
+        <KeyValue label="Representative Available" value={data.representativeavailability} />
+        <KeyValue label="Wiring Test Report" value={data.wiringtestreport} />
+        <KeyValue label="ELCB Available" value={data.elcB_AVAILABLE} />
+        <KeyValue label="MCB Available" value={data.mcB_AVAILABLE} />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="TF Details">
+        <KeyValue label="TF Area Type" value={data.tfareatype} />
+        <KeyValue label="Locality Type" value={data.tflocalitytype} />
+        <KeyValue label="Nature of Use" value={data.tfnatureofuse} />
+        <KeyValue label="TF Structure of Premises" value={data.tfstructureofpremises} />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Property Details">
+        <KeyValue label="Plot Area" value={data.ploT_AREA} />
+        <KeyValue label="Covered Area" value={data.covereD_AREA} />
+        <KeyValue label="Common Area Parking" value={data.commaN_AREA_PARKING} />
+        <KeyValue label="Separate Entry" value={data.separatE_ENTRY} />
+        <KeyValue label="Separate Meter Available" value={data.seperatE_MTR_AVAILABLE} />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="MMG Information">
+        <KeyValue label="MMG DT" value={data.mmgDt} />
+        <KeyValue label="MMG Meter Location" value={data.mmgMeterLocation} />
+        <KeyValue label="MMG Meter Quality" value={data.mmgMeterQualityStatus} />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="CF Details">
+        {(data.cfDataList || []).map((cf, idx) => (
+          <React.Fragment key={idx}>
+            <KeyValue label="CA" value={cf.ca} />
+            <KeyValue label="Net OS Amt" value={cf.netOSAmt} />
+            <KeyValue label="Name" value={cf.name} />
+            <KeyValue label="Address" value={cf.address} />
+          </React.Fragment>
+        ))}
+      </CollapsibleCard>
+
+      <CollapsibleCard title="MCD Details">
+        {(data.mcdDataList || []).map((mcd, idx) => (
+          <React.Fragment key={idx}>
+            <KeyValue label="Unit Name" value={mcd.nameOfUnit} />
+            <KeyValue label="Property Address" value={mcd.addressOfProperty} />
+          </React.Fragment>
+        ))}
+      </CollapsibleCard>
+
+      <View style={styles.tfRevisitContainer}>
+        <TouchableOpacity style={styles.tfRevisitButtons} onPress={() => setTFRevisitVisible(true)}>
+          <Text style={styles.tfRevisitTitle}>TF REVISIT</Text>
+        </TouchableOpacity>
+        <View style={styles.tfRevisitButtons}>
+          <TouchableOpacity style={styles.rejectButton} onPress={() => setRejectModalVisible(true)}>
+            <Text style={styles.buttonText}>REJECT</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.approveButton} onPress={() => setApproveModalVisible(true)}>
+            <Text style={styles.buttonText}>APPROVE</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <RejectReasonModal visible={isRejectModalVisible} onClose={() => setRejectModalVisible(false)} onSubmit={(data) => console.log('Rejected:', data)} />
+      <ApproveCommentModal visible={isApproveModalVisible} onClose={() => setApproveModalVisible(false)} onSubmit={(comment) => console.log('Approved:', comment)} />
+      <TFrevisitModal visible={isTFRevisitVisible} onClose={() => setTFRevisitVisible(false)} onSubmit={(comment) => console.log('TF Revisit Comment:', comment)} />
+    </ScrollView>
+  );
 };
 
 export default DetailScreen;

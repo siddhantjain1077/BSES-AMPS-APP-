@@ -1,22 +1,13 @@
+// components/CollapsibleCard.js
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  LayoutAnimation,
-  Platform,
-  UIManager,
-} from 'react-native';
+import { View, Text, TouchableOpacity, LayoutAnimation } from 'react-native';
 import { useTheme } from '../screens/ThemeContext';
 import getStyles from '../screens/DetailScreen.styling';
 
-if (Platform.OS === 'android') {
-  UIManager.setLayoutAnimationEnabledExperimental?.(true);
-}
-
-export const CollapsibleCard = ({ title, children, initialExpanded = true }) => {
+const CollapsibleCard = ({ title, children, initialExpanded = true }) => {
   const { colors, isDark } = useTheme();
   const styles = getStyles(colors, isDark);
+
   const [expanded, setExpanded] = useState(initialExpanded);
 
   const toggleExpanded = () => {
@@ -37,14 +28,4 @@ export const CollapsibleCard = ({ title, children, initialExpanded = true }) => 
   );
 };
 
-export const KeyValue = ({ label, value, color }) => {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors, isDark);
-
-  return (
-    <View style={styles.row}>
-      <Text style={[styles.label, { color: color ?? colors.text }]}>{label}</Text>
-      <Text style={[styles.value, { color: color ?? colors.text }]}>{value}</Text>
-    </View>
-  );
-};
+export default CollapsibleCard;
