@@ -1,4 +1,3 @@
-// components/CollapsibleCard.js
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, LayoutAnimation } from 'react-native';
 import { useTheme } from '../screens/ThemeContext';

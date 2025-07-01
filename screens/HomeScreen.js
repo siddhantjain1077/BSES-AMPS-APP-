@@ -12,17 +12,26 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../screens/ThemeContext';
-import { postRequest, PENDING_LIST_URL } from '../Services/api';
+import {
+  postRequest,
+  PENDING_LIST_URL,
+  COMPLETED_CASE_URL,
+} from '../Services/api';
 
 const HomeScreen = ({ navigation }) => {
-  const { isDark, mode, setMode, colors } = useTheme();
+  const { isDark, colors } = useTheme();
   const [selectedTab, setSelectedTab] = useState('Pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [dataList, setDataList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchPendingList();
-  }, []);
+    if (selectedTab === 'Pending') {
+      fetchPendingList();
+    } else {
+      fetchCompletedList();
+    }
+  }, [selectedTab]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -53,47 +62,90 @@ const HomeScreen = ({ navigation }) => {
         userId: 'dsktfauTo',
         division: 'S2RKP',
       };
-      console.log('[📦 Payload]', payload);
 
       const response = await postRequest(PENDING_LIST_URL, payload);
-      console.log('[✅ API Response]', response);
-      console.log('[✅ API Data]', response?.data);
-
       if (Array.isArray(response.data)) {
-        console.log('Statuses:', response.data.map(d => d.status));
-        console.log('[Sample Item]', response.data[0]);
-        console.log('Total items:', response.data.length);
-        console.log("[Total] Items]", response.data);
         setDataList(response.data);
       } else {
-        Alert.alert('Error', 'Unexpected response from server.');
+        Alert.alert('Error', 'Unexpected response from pending API.');
       }
     } catch (error) {
-      console.error('Fetch error:', error);
-      Alert.alert('Error', 'Failed to fetch pending case list.');
+      console.error('Pending fetch error:', error);
+      Alert.alert('Error', 'Failed to fetch pending cases.');
     }
+  };
+
+  const fetchCompletedList = async () => {
+    try {
+      const payload = {
+        userId: 'dsktfauTo',
+        division: 'S2RKP',
+      };
+
+      const response = await postRequest(COMPLETED_CASE_URL, payload);
+      if (Array.isArray(response.data)) {
+        setDataList(response.data);
+      } else {
+        Alert.alert('Error', 'Unexpected response from completed API.');
+      }
+    } catch (error) {
+      console.error('Completed fetch error:', error);
+      Alert.alert('Error', 'Failed to fetch completed cases.');
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (selectedTab === 'Pending') {
+      await fetchPendingList();
+    } else {
+      await fetchCompletedList();
+    }
+    setRefreshing(false);
   };
 
   const filteredData = dataList.filter(item => {
     const lower = searchQuery.toLowerCase();
-    return (
+    const matchesSearch =
       item.applicantName?.toLowerCase().includes(lower) ||
       item.orderNo?.toLowerCase().includes(lower) ||
-      item.address?.toLowerCase().includes(lower)
-    );
+      item.address?.toLowerCase().includes(lower);
+
+    const status = item.caseFlag?.toUpperCase();
+
+    if (selectedTab === 'Approved') {
+      return matchesSearch && status === 'A';
+    } else if (selectedTab === 'Rejected') {
+      return matchesSearch && status === 'R';
+    }
+
+    return matchesSearch;
   });
 
   const renderHeader = () => (
     <View>
       <View style={styles.topBar}>
-        <Text style={[styles.headerText, { color: colors.text }]}>👋 Welcome, AMPS User</Text>
+        <Text style={[styles.headerText, { color: colors.text }]}>
+          👋 Welcome, AMPS User
+        </Text>
       </View>
 
       <View style={styles.tabContainer}>
         {['Pending', 'Approved', 'Rejected'].map(tab => {
           const isActive = selectedTab === tab;
-          const bg = isActive ? (tab === 'Pending' ? '#007bff' : tab === 'Approved' ? '#28a745' : '#dc3545') : 'transparent';
-          const border = tab === 'Pending' ? '#007bff' : tab === 'Approved' ? '#28a745' : '#dc3545';
+          const bg = isActive
+            ? tab === 'Pending'
+              ? '#007bff'
+              : tab === 'Approved'
+              ? '#28a745'
+              : '#dc3545'
+            : 'transparent';
+          const border =
+            tab === 'Pending'
+              ? '#007bff'
+              : tab === 'Approved'
+              ? '#28a745'
+              : '#dc3545';
           const color = isActive ? '#fff' : border;
           return (
             <TouchableOpacity
@@ -118,7 +170,9 @@ const HomeScreen = ({ navigation }) => {
         <Text style={[styles.refreshText, { color: '#007bff' }]}>⟳</Text>
       </View>
 
-      <Text style={[styles.totalText, { color: colors.text }]}>Total Cases: {filteredData.length}</Text>
+      <Text style={[styles.totalText, { color: colors.text }]}>
+        Total Cases: {filteredData.length}
+      </Text>
     </View>
   );
 
@@ -126,7 +180,7 @@ const HomeScreen = ({ navigation }) => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={filteredData}
-        keyExtractor={item => item.orderNo}
+        keyExtractor={(item, index) => `${item.orderNo}_${index}`}
         ListHeaderComponent={renderHeader}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -141,13 +195,28 @@ const HomeScreen = ({ navigation }) => {
             }
           >
             <View style={[styles.card, { backgroundColor: colors.card }]}>
-              <Text style={[styles.orderNo, { color: colors.text }]}>Order No: {item.orderNo}</Text>
-              <Text style={[styles.name, { color: colors.text }]}>Applicant: {item.applicantName}</Text>
-              <Text style={[styles.address, { color: colors.text }]}>{item.address}</Text>
-              <Text style={[styles.date, { color: colors.text }]}>Received: {item.entryDate}</Text>
+              <Text style={[styles.orderNo, { color: colors.text }]}>
+                Order No: {item.orderNo}
+              </Text>
+              <Text style={[styles.name, { color: colors.text }]}>
+                Applicant: {item.applicantName}
+              </Text>
+              <Text style={[styles.address, { color: colors.text }]}>
+                {item.address}
+              </Text>
+              <Text style={[styles.date, { color: colors.text }]}>
+                Status:{' '}
+                {item.caseFlag === 'A'
+                  ? 'Approved'
+                  : item.caseFlag === 'R'
+                  ? 'Rejected'
+                  : 'Pending'}
+              </Text>
             </View>
           </TouchableOpacity>
         )}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
     </View>
   );

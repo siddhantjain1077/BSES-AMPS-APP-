@@ -12,7 +12,6 @@ import {
   Alert,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import getStyles from '../screens/DetailScreen.styling';
 import { useTheme } from '../screens/ThemeContext';
 import bijliLight from '../assets/Bijli_kendra_white.png';
