@@ -21,6 +21,7 @@ import { TF_ENG_LIST_URL, postRequest } from '../Services/api';
 import { DROPDOWN_LIST_URL } from '../Services/api';
 import { Picker } from '@react-native-picker/picker';
 import { TF_REVISIT_SUBMIT_URL } from '../Services/api';
+import { COMPLETED_CASE_URL } from '../Services/api';
 
 
 const CollapsibleCard = ({ title, children, initialExpanded = false }) => {
@@ -215,7 +216,6 @@ const TFrevisitModal = ({ visible, onClose, onSubmit, userId, division }) => {
         const payload = { userId, division };
         const response = await postRequest(TF_ENG_LIST_URL, payload);
 
-        // ✅ Log after receiving the response
         console.log('[👷 TF Engineers API Response]', response);
 
         if (Array.isArray(response?.data)) {
@@ -318,6 +318,31 @@ const DetailScreen = () => {
 
   const route = useRoute();
   const { orderDetails } = route.params || {};
+
+  const handleApproveSubmit = async (comment) => {
+  try {
+    const payload = {
+      userId: 'dsktfauTo', // or fetch from AsyncStorage
+      division: orderDetails?.division || 'S2RKP',
+      orderNo: orderDetails?.orderNo,
+      zdin: orderDetails?.zdin,
+      comment: comment,
+    };
+
+    console.log('[📤 Submitting Completed Case]', payload);
+
+    const response = await postRequest(COMPLETED_CASE_URL, payload);
+
+    if (response?.success) {
+      Alert.alert('Success', 'Case marked as completed successfully.');
+    } else {
+      Alert.alert('Failure', response?.message || 'Submission failed.');
+    }
+  } catch (err) {
+    console.error('[❌ Approve Submit Error]', err);
+    Alert.alert('Error', 'Something went wrong while submitting approval.');
+  }
+};
 
   const handleTFRevisitSubmit = async ({ engineer, comment }) => {
     try {
@@ -504,7 +529,10 @@ const DetailScreen = () => {
       </View>
 
       <RejectReasonModal visible={isRejectModalVisible} onClose={() => setRejectModalVisible(false)} onSubmit={(data) => console.log('Rejected:', data)} />
-      <ApproveCommentModal visible={isApproveModalVisible} onClose={() => setApproveModalVisible(false)} onSubmit={(comment) => console.log('Approved:', comment)} />
+      <ApproveCommentModal 
+      visible={isApproveModalVisible} 
+      onClose={() => setApproveModalVisible(false)} 
+        onSubmit={handleApproveSubmit} />
       <TFrevisitModal
         visible={isTFRevisitVisible}
         onClose={() => setTFRevisitVisible(false)}
