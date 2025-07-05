@@ -85,6 +85,7 @@ const HomeScreen = ({ navigation }) => {
       const response = await postRequest(COMPLETED_CASE_URL, payload);
       if (Array.isArray(response.data)) {
         setDataList(response.data);
+        console.log('Completed cases fetched:', response.data);
       } else {
         Alert.alert('Error', 'Unexpected response from completed API.');
       }

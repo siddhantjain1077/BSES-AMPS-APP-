@@ -208,8 +208,8 @@ const getStyles = (colors, isDark) =>
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 999,        
-      elevation: 10,     
+      zIndex: 999,
+      elevation: 10,
     },
     modalView: {
       backgroundColor: colors.card,
@@ -254,6 +254,60 @@ const getStyles = (colors, isDark) =>
       paddingHorizontal: 20,
       borderRadius: 8,
     },
+    dropdownContainer: {
+      marginBottom: 20,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 8,
+      padding: 10,
+      maxHeight: 150,
+    },
+   engineerCard: {
+  padding: 12,
+  marginVertical: 8,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: '#ccc',
+  backgroundColor: '#f2f2f2',
+},
+    selectedEngineerCard: {
+  borderColor: '#007bff',
+  backgroundColor: '#e6f0ff',
+},
+    engineerText: {
+      fontSize: 14,
+      color: colors.text,
+    },
+
+    dropdownItem: {
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: '#ddd',
+    },
+
+    dropdownItemText: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    selectedDropdownItem: {
+      backgroundColor: isDark ? '#333' : '#e6f0ff',
+      borderRadius: 6,
+    },
+    dropdownContainer: {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 6,
+  marginVertical: 10,
+},
+
+pickerStyle: {
+  height: 60,
+  // width: '100%',  
+  color: colors.text,
+  fontSize: 14,
+}
   });
 
 export default getStyles;

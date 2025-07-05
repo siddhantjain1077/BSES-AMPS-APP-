@@ -10,10 +10,13 @@ import DetailScreen from './screens/DetailScreen';
 import { ThemeProvider } from './screens/ThemeContext';
 import DrawerNavigator from './Navigation/DrawerNavigator';
 import { enableScreens } from 'react-native-screens';
+import { LogBox } from 'react-native';
+
 // import LoginDebugger from './Services/api';
 enableScreens();
 
 const Stack = createNativeStackNavigator();
+LogBox.ignoreAllLogs(false); // ✅ Show logs again
 
 export default function App() {
   useEffect(() => {

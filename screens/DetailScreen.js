@@ -16,7 +16,12 @@ import getStyles from '../screens/DetailScreen.styling';
 import { useTheme } from '../screens/ThemeContext';
 import bijliLight from '../assets/Bijli_kendra_white.png';
 import bijliDark from '../assets/BijliSevaKendra_withoutBG.png';
-import { postRequest, VIEW_PENDING_URL } from '../Services/api';
+import { VIEW_PENDING_URL } from '../Services/api';
+import { TF_ENG_LIST_URL, postRequest } from '../Services/api';
+import { DROPDOWN_LIST_URL } from '../Services/api';
+import { Picker } from '@react-native-picker/picker';
+import { TF_REVISIT_SUBMIT_URL } from '../Services/api';
+
 
 const CollapsibleCard = ({ title, children, initialExpanded = false }) => {
   const { colors, isDark } = useTheme();
@@ -49,16 +54,49 @@ const KeyValue = ({ label, value }) => {
     </View>
   );
 };
-
 const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
+
   const [selectedReason, setSelectedReason] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [dropdownItems, setDropdownItems] = useState([]);
   const [comment, setComment] = useState('');
 
+useEffect(() => {
+  const fetchDeficiencyList = async () => {
+    try {
+      const response = await postRequest(DROPDOWN_LIST_URL, {}); 
+
+      console.log('[✅ Raw Deficiency List API Response]', response);
+
+      if (Array.isArray(response?.data)) {
+        console.log('[📋 Parsed Items]', response.data); // <-- LOG HERE
+        setDropdownItems(response.data); 
+      } else {
+        console.warn('[⚠️ Unexpected Response Format]', response);
+      }
+    } catch (error) {
+      console.error('[❌ Deficiency Fetch Error]', error);
+    }
+  };
+
+  if (visible) {
+    fetchDeficiencyList();
+  }
+}, [visible]);
+
+
+
   const handleSubmit = () => {
-    onSubmit({ selectedReason, comment });
+    onSubmit({
+      selectedReason,
+      code: selectedItem,
+      comment,
+    });
+
     setSelectedReason(null);
+    setSelectedItem(null);
     setComment('');
     onClose();
   };
@@ -68,20 +106,60 @@ const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Reasons for Rejection</Text>
+
           {['TF Deficiency', 'CF Deficiency', 'TF + CF Deficiency'].map((reason) => (
-            <TouchableOpacity key={reason} onPress={() => setSelectedReason(reason)} style={styles.radioButtonContainer}>
+            <TouchableOpacity
+              key={reason}
+              onPress={() => setSelectedReason(reason)}
+              style={styles.radioButtonContainer}
+            >
               <View style={styles.radioButton}>
                 {selectedReason === reason && <View style={styles.radioButtonInner} />}
               </View>
               <Text style={styles.radioLabel}>{reason}</Text>
             </TouchableOpacity>
           ))}
-          <TextInput style={styles.commentInput} placeholder="Write a comment..." multiline value={comment} onChangeText={setComment} textAlignVertical="top" />
+
+          <Text style={{ marginTop: 10, fontWeight: '600', color: colors.text }}>
+            Total Selected Reasons = {selectedItem ? 1 : 0}
+          </Text>
+
+          <View style={styles.dropdownContainer}>
+            <Picker
+              selectedValue={selectedItem}
+              onValueChange={(itemValue) => setSelectedItem(itemValue)}
+              style={styles.pickerStyle}
+              dropdownIconColor={colors.text}
+            >
+              <Picker.Item label="Select item" value={null} />
+              {dropdownItems.map((item, index) => (
+                <Picker.Item 
+                key={index} 
+                label={item.codeText} 
+                value={item.code} />
+              ))}
+            </Picker>
+          </View>
+
+          <TextInput
+            style={styles.commentInput}
+            placeholder="Write a comment..."
+            placeholderTextColor={colors.textSecondary || '#888'}
+            multiline
+            value={comment}
+            onChangeText={setComment}
+            textAlignVertical="top"
+          />
+
           <View style={styles.modalButtonsContainer}>
             <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
               <Text style={styles.buttonText}>Back</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!selectedReason}>
+            <TouchableOpacity
+              style={styles.modalSubmitButton}
+              onPress={handleSubmit}
+              disabled={!selectedReason || !selectedItem}
+            >
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
           </View>
@@ -120,28 +198,106 @@ const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
   );
 };
 
-const TFrevisitModal = ({ visible, onClose, onSubmit }) => {
+const TFrevisitModal = ({ visible, onClose, onSubmit, userId, division }) => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const [comment, setComment] = useState('');
+  const [engineers, setEngineers] = useState([]);
+  const [selectedEngineer, setSelectedEngineer] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchEngineers = async () => {
+      if (!visible) return;
+      setLoading(true);
+
+      try {
+        const payload = { userId, division };
+        const response = await postRequest(TF_ENG_LIST_URL, payload);
+
+        // ✅ Log after receiving the response
+        console.log('[👷 TF Engineers API Response]', response);
+
+        if (Array.isArray(response?.data)) {
+          console.log('[✅ TF Engineers]', response.data);
+          setEngineers(response.data);
+        } else {
+          console.warn('[❌ Unexpected TF Engineer Response]', response);
+          Alert.alert('Error', 'No TF engineers found.');
+        }
+      } catch (err) {
+        console.error('[❌ TF Engineer Fetch Error]', err);
+        Alert.alert('Error', 'Failed to load TF engineer list.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEngineers();
+  }, [visible]);
+
+
   const handleSubmit = () => {
-    if (comment.trim()) {
-      onSubmit(comment);
+    if (selectedEngineer && comment.trim()) {
+      onSubmit({ engineer: selectedEngineer, comment });
       setComment('');
+      setSelectedEngineer(null);
       onClose();
     }
   };
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Enter TF Revisit Comment</Text>
-          <TextInput style={styles.commentInput} placeholder="Write a comment..." multiline value={comment} onChangeText={setComment} textAlignVertical="top" />
+          <Text style={styles.modalTitle}>TF Revisit</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>Select TF Engineer</Text>
+
+          {loading ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <ScrollView style={styles.modalScroll}>
+              {engineers.map((eng, idx) => {
+                const isSelected = selectedEngineer?.engineerId === eng.engineerId;
+                return (
+                  <TouchableOpacity
+                    key={idx}
+                    onPress={() => setSelectedEngineer(eng)}
+                    style={[
+                      styles.engineerCard,
+                      selectedEngineer?.tfUserId === eng.tfUserId && styles.selectedEngineerCard
+                    ]}
+                  >
+                    <Text style={styles.engineerText}>Name: {eng.tfName}</Text>
+                    <Text style={styles.engineerText}>ID: {eng.tfUserId}</Text>
+                    <Text style={styles.engineerText}>Division: {eng.tfDivision}</Text>
+                    <Text style={styles.engineerText}>Pending Cases: {eng.pendingCases || 0}</Text>
+
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          )}
+
+          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Enter Your Comments</Text>
+          <TextInput
+            style={styles.commentInput}
+            placeholder="Write a comment..."
+            multiline
+            value={comment}
+            onChangeText={setComment}
+            textAlignVertical="top"
+          />
+
           <View style={styles.modalButtonsContainer}>
             <TouchableOpacity style={styles.modalBackButton} onPress={onClose}>
               <Text style={styles.buttonText}>Back</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalSubmitButton} onPress={handleSubmit} disabled={!comment.trim()}>
+            <TouchableOpacity
+              style={styles.modalSubmitButton}
+              onPress={handleSubmit}
+              disabled={!selectedEngineer || !comment.trim()}
+            >
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
           </View>
@@ -163,6 +319,32 @@ const DetailScreen = () => {
   const route = useRoute();
   const { orderDetails } = route.params || {};
 
+  const handleTFRevisitSubmit = async ({ engineer, comment }) => {
+    try {
+      const payload = {
+        engineerId: engineer.tfUserId,
+        orderNo: orderDetails.orderNo,
+        division: 'S2RKP',
+        zdin: orderDetails.zdin,
+        comment: comment,
+        // userId: 'dsktfauTo', 
+      };
+
+      console.log('[📤 Submitting TF Revisit]', payload);
+
+      const response = await postRequest(TF_REVISIT_SUBMIT_URL, payload);
+
+      if (response?.success) {
+        Alert.alert('Success', 'TF Revisit request submitted successfully.');
+      } else {
+        Alert.alert('Failed', response?.message || 'Submission failed.');
+      }
+    } catch (error) {
+      console.error('[❌ Submit Error]', error);
+      Alert.alert('Error', 'Something went wrong while submitting.');
+    }
+  };
+
   useEffect(() => {
     console.log('[🧭 route.params]', route.params);
     console.log('[🧾 orderDetails]', orderDetails);
@@ -174,8 +356,11 @@ const DetailScreen = () => {
         return;
       }
 
-      const { orderNo, division, zdin } = orderDetails;
+      console.log('[📋 Fetching Order Details]', orderDetails);
+      const division = 'S2RKP'; // manually assigned
+      const { orderNo, zdin } = orderDetails;
       const payload = { orderNo, division, zdin };
+
 
       try {
         const response = await postRequest(VIEW_PENDING_URL, payload);
@@ -320,7 +505,14 @@ const DetailScreen = () => {
 
       <RejectReasonModal visible={isRejectModalVisible} onClose={() => setRejectModalVisible(false)} onSubmit={(data) => console.log('Rejected:', data)} />
       <ApproveCommentModal visible={isApproveModalVisible} onClose={() => setApproveModalVisible(false)} onSubmit={(comment) => console.log('Approved:', comment)} />
-      <TFrevisitModal visible={isTFRevisitVisible} onClose={() => setTFRevisitVisible(false)} onSubmit={(comment) => console.log('TF Revisit Comment:', comment)} />
+      <TFrevisitModal
+        visible={isTFRevisitVisible}
+        onClose={() => setTFRevisitVisible(false)}
+        onSubmit={handleTFRevisitSubmit}
+        userId="dsktfauTo"
+        division={orderDetails?.division}
+      />
+
     </ScrollView>
   );
 };
