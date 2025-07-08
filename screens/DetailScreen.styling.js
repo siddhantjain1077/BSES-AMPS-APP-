@@ -238,6 +238,7 @@ const getStyles = (colors, isDark) =>
       marginBottom: 20,
       color: colors.text,
     },
+
     modalButtonsContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',

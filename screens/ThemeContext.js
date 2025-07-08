@@ -1,27 +1,37 @@
 // ThemeContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Appearance } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Import necessary modules
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Appearance } from 'react-native'; // Used to detect system theme (dark/light)
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Persistent storage
+
+// Create a context to hold theme-related values
 const ThemeContext = createContext();
 
+// ThemeProvider component to wrap around the app and manage theme state
 export const ThemeProvider = ({ children }) => {
-  const [themeMode, setThemeMode] = useState('system');
+  const [themeMode, setThemeMode] = useState('system'); // Default theme mode
 
+  // On mount, retrieve the stored theme mode from AsyncStorage
   useEffect(() => {
     AsyncStorage.getItem('themeMode').then(mode => {
       if (mode) setThemeMode(mode);
     });
   }, []);
 
+  // Function to update theme mode and persist it in AsyncStorage
   const setMode = async (mode) => {
     setThemeMode(mode);
     await AsyncStorage.setItem('themeMode', mode);
   };
 
+  // Get system color scheme (light/dark)
   const colorScheme = Appearance.getColorScheme();
+
+  // Determine if the theme should be dark
   const isDark = themeMode === 'system' ? colorScheme === 'dark' : themeMode === 'dark';
 
+  // Define theme colors based on whether it's dark mode
   const theme = {
     isDark,
     mode: themeMode,
@@ -36,6 +46,7 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
+  // Provide the theme object to the rest of the app
   return (
     <ThemeContext.Provider value={theme}>
       {children}
@@ -43,4 +54,5 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
+// Custom hook to access the theme context in any component
 export const useTheme = () => useContext(ThemeContext);

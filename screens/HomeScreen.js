@@ -19,12 +19,13 @@ import {
 } from '../Services/api';
 
 const HomeScreen = ({ navigation }) => {
-  const { isDark, colors } = useTheme();
-  const [selectedTab, setSelectedTab] = useState('Pending');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dataList, setDataList] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const { isDark, colors } = useTheme(); // Theme context
+  const [selectedTab, setSelectedTab] = useState('Pending'); // Default tab
+  const [searchQuery, setSearchQuery] = useState(''); // Search input
+  const [dataList, setDataList] = useState([]); // List of fetched cases
+  const [refreshing, setRefreshing] = useState(false); // Pull-to-refresh
 
+  // Fetch data on tab change
   useEffect(() => {
     if (selectedTab === 'Pending') {
       fetchPendingList();
@@ -33,6 +34,7 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [selectedTab]);
 
+  // Handle Android hardware back button with exit confirmation
   useFocusEffect(
     React.useCallback(() => {
       const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -42,15 +44,17 @@ const HomeScreen = ({ navigation }) => {
         ]);
         return true;
       });
-      return () => backHandler.remove();
+      return () => backHandler.remove(); // Clean up
     }, [])
   );
 
+  // Fetch pending cases API
   const fetchPendingList = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       const expiry = await AsyncStorage.getItem('tokenExpiry');
 
+      // Token expired or not found
       if (!token || Date.now() > parseInt(expiry)) {
         Alert.alert('Session Expired', 'Please log in again.');
         await AsyncStorage.multiRemove(['token', 'tokenExpiry']);
@@ -75,6 +79,7 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  // Fetch approved/rejected cases from completed API
   const fetchCompletedList = async () => {
     try {
       const payload = {
@@ -95,6 +100,7 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  // Pull-to-refresh logic
   const onRefresh = async () => {
     setRefreshing(true);
     if (selectedTab === 'Pending') {
@@ -105,6 +111,7 @@ const HomeScreen = ({ navigation }) => {
     setRefreshing(false);
   };
 
+  // Filter data based on search query and tab status
   const filteredData = dataList.filter(item => {
     const lower = searchQuery.toLowerCase();
     const matchesSearch =
@@ -120,17 +127,20 @@ const HomeScreen = ({ navigation }) => {
       return matchesSearch && status === 'R';
     }
 
-    return matchesSearch;
+    return matchesSearch; // For pending
   });
 
+  // Render header (tabs + search bar + count)
   const renderHeader = () => (
     <View>
+      {/* Welcome Text */}
       <View style={styles.topBar}>
         <Text style={[styles.headerText, { color: colors.text }]}>
           👋 Welcome, AMPS User
         </Text>
       </View>
 
+      {/* Tab Buttons */}
       <View style={styles.tabContainer}>
         {['Pending', 'Approved', 'Rejected'].map(tab => {
           const isActive = selectedTab === tab;
@@ -148,6 +158,7 @@ const HomeScreen = ({ navigation }) => {
               ? '#28a745'
               : '#dc3545';
           const color = isActive ? '#fff' : border;
+
           return (
             <TouchableOpacity
               key={tab}
@@ -160,6 +171,7 @@ const HomeScreen = ({ navigation }) => {
         })}
       </View>
 
+      {/* Search Input */}
       <View style={[styles.searchContainer, { backgroundColor: colors.searchBg }]}>
         <TextInput
           style={[styles.searchInput, { color: colors.text }]}
@@ -168,9 +180,11 @@ const HomeScreen = ({ navigation }) => {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
+        {/* Refresh Icon */}
         <Text style={[styles.refreshText, { color: '#007bff' }]}>⟳</Text>
       </View>
 
+      {/* Total Count */}
       <Text style={[styles.totalText, { color: colors.text }]}>
         Total Cases: {filteredData.length}
       </Text>
@@ -179,6 +193,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* List of filtered cases */}
       <FlatList
         data={filteredData}
         keyExtractor={(item, index) => `${item.orderNo}_${index}`}
@@ -225,6 +240,7 @@ const HomeScreen = ({ navigation }) => {
 
 export default HomeScreen;
 
+// Style definitions
 const styles = StyleSheet.create({
   container: {
     padding: 16,

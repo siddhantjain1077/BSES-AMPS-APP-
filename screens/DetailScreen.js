@@ -20,7 +20,7 @@ import { VIEW_PENDING_URL } from '../Services/api';
 import { TF_ENG_LIST_URL, postRequest } from '../Services/api';
 import { DROPDOWN_LIST_URL } from '../Services/api';
 import { Picker } from '@react-native-picker/picker';
-import { TF_REVISIT_SUBMIT_URL } from '../Services/api';
+// import { TF_ENG_LIST_URL } from '../Services/api';
 import { COMPLETED_CASE_URL } from '../Services/api';
 
 
@@ -64,30 +64,28 @@ const RejectReasonModal = ({ visible, onClose, onSubmit }) => {
   const [dropdownItems, setDropdownItems] = useState([]);
   const [comment, setComment] = useState('');
 
-useEffect(() => {
-  const fetchDeficiencyList = async () => {
-    try {
-      const response = await postRequest(DROPDOWN_LIST_URL, {}); 
+  useEffect(() => {
+    const fetchDeficiencyList = async () => {
+      try {
+        const response = await postRequest(DROPDOWN_LIST_URL, {});
 
-      console.log('[✅ Raw Deficiency List API Response]', response);
+        console.log('[✅ Raw Deficiency List API Response]', response);
 
-      if (Array.isArray(response?.data)) {
-        console.log('[📋 Parsed Items]', response.data); // <-- LOG HERE
-        setDropdownItems(response.data); 
-      } else {
-        console.warn('[⚠️ Unexpected Response Format]', response);
+        if (Array.isArray(response?.data)) {
+          console.log('[📋 Parsed Items]', response.data); // <-- LOG HERE
+          setDropdownItems(response.data);
+        } else {
+          console.warn('[⚠️ Unexpected Response Format]', response);
+        }
+      } catch (error) {
+        console.error('[❌ Deficiency Fetch Error]', error);
       }
-    } catch (error) {
-      console.error('[❌ Deficiency Fetch Error]', error);
+    };
+
+    if (visible) {
+      fetchDeficiencyList();
     }
-  };
-
-  if (visible) {
-    fetchDeficiencyList();
-  }
-}, [visible]);
-
-
+  }, [visible]);
 
   const handleSubmit = () => {
     onSubmit({
@@ -134,10 +132,10 @@ useEffect(() => {
             >
               <Picker.Item label="Select item" value={null} />
               {dropdownItems.map((item, index) => (
-                <Picker.Item 
-                key={index} 
-                label={item.codeText} 
-                value={item.code} />
+                <Picker.Item
+                  key={index}
+                  label={item.codeText}
+                  value={item.code} />
               ))}
             </Picker>
           </View>
@@ -199,6 +197,43 @@ const ApproveCommentModal = ({ visible, onClose, onSubmit }) => {
   );
 };
 
+
+const DetailScreen = () => {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors, isDark);
+  const [isRejectModalVisible, setRejectModalVisible] = useState(false);
+  const [isApproveModalVisible, setApproveModalVisible] = useState(false);
+  const [isTFRevisitVisible, setTFRevisitVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+
+  const route = useRoute();
+  const { orderDetails } = route.params || {};
+
+  const handleApproveSubmit = async (comment) => {
+    try {
+      const payload = {
+        userId: 'dsktfauTo', // or fetch from AsyncStorage
+        division: orderDetails?.division || 'S2RKP',
+        orderNo: orderDetails?.orderNo,
+        zdin: orderDetails?.zdin,
+        comment: comment,
+      };
+
+      console.log('[📤 Submitting Completed Case]', payload);
+
+      const response = await postRequest(COMPLETED_CASE_URL, payload);
+
+      if (response?.success) {
+        Alert.alert('Success', 'Case marked as completed successfully.');
+      } else {
+        Alert.alert('Failure', response?.message || 'Submission failed.');
+      }
+    } catch (err) {
+      console.error('[❌ Approve Submit Error]', err);
+      Alert.alert('Error', 'Something went wrong while submitting approval.');
+    }
+  };
 const TFrevisitModal = ({ visible, onClose, onSubmit, userId, division }) => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
@@ -207,44 +242,50 @@ const TFrevisitModal = ({ visible, onClose, onSubmit, userId, division }) => {
   const [selectedEngineer, setSelectedEngineer] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchEngineers = async () => {
-      if (!visible) return;
-      setLoading(true);
+useEffect(() => {
+  const fetchEngineers = async () => {
+    if (!visible) return;
+    setLoading(true);
 
-      try {
-        const payload = { userId, division };
-        const response = await postRequest(TF_ENG_LIST_URL, payload);
+    try {
+      const payload = {
+        userId: 'dsktfauTo', 
+        division: orderDetails?.division || 'S2RKP',
+        orderNo: orderDetails?.orderNo,
+        zdin: orderDetails?.zdin,
+        comment: comment,
+      };
 
-        console.log('[👷 TF Engineers API Response]', response);
+      const response = await postRequest(TF_ENG_LIST_URL, payload);
 
-        if (Array.isArray(response?.data)) {
-          console.log('[✅ TF Engineers]', response.data);
-          setEngineers(response.data);
-        } else {
-          console.warn('[❌ Unexpected TF Engineer Response]', response);
-          Alert.alert('Error', 'No TF engineers found.');
-        }
-      } catch (err) {
-        console.error('[❌ TF Engineer Fetch Error]', err);
-        Alert.alert('Error', 'Failed to load TF engineer list.');
-      } finally {
-        setLoading(false);
+      console.log('[👷 TF Engineers API Response]', response);
+
+      if (Array.isArray(response?.data)) {
+        console.log('[✅ TF Engineers]', response.data);
+        setEngineers(response.data);
+      } else {
+        console.warn('[❌ Unexpected TF Engineer Response]', response);
+        Alert.alert('Error', 'No TF engineers found.');
       }
-    };
-
-    fetchEngineers();
-  }, [visible]);
-
-
-  const handleSubmit = () => {
-    if (selectedEngineer && comment.trim()) {
-      onSubmit({ engineer: selectedEngineer, comment });
-      setComment('');
-      setSelectedEngineer(null);
-      onClose();
+    } catch (err) {
+      console.error('[❌ TF Engineer Fetch Error]', err);
+      Alert.alert('Error', 'Failed to load TF engineer list.');
+    } finally {
+      setLoading(false);
     }
   };
+
+  fetchEngineers();
+}, [visible, userId, division]);
+
+const handleSubmit = () => {
+  if (selectedEngineer && comment.trim()) {
+    onSubmit({ engineer: selectedEngineer, comment });
+    setComment('');
+    setSelectedEngineer(null);
+    onClose();
+  }
+};
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -307,43 +348,6 @@ const TFrevisitModal = ({ visible, onClose, onSubmit, userId, division }) => {
   );
 };
 
-const DetailScreen = () => {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors, isDark);
-  const [isRejectModalVisible, setRejectModalVisible] = useState(false);
-  const [isApproveModalVisible, setApproveModalVisible] = useState(false);
-  const [isTFRevisitVisible, setTFRevisitVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
-
-  const route = useRoute();
-  const { orderDetails } = route.params || {};
-
-  const handleApproveSubmit = async (comment) => {
-  try {
-    const payload = {
-      userId: 'dsktfauTo', // or fetch from AsyncStorage
-      division: orderDetails?.division || 'S2RKP',
-      orderNo: orderDetails?.orderNo,
-      zdin: orderDetails?.zdin,
-      comment: comment,
-    };
-
-    console.log('[📤 Submitting Completed Case]', payload);
-
-    const response = await postRequest(COMPLETED_CASE_URL, payload);
-
-    if (response?.success) {
-      Alert.alert('Success', 'Case marked as completed successfully.');
-    } else {
-      Alert.alert('Failure', response?.message || 'Submission failed.');
-    }
-  } catch (err) {
-    console.error('[❌ Approve Submit Error]', err);
-    Alert.alert('Error', 'Something went wrong while submitting approval.');
-  }
-};
-
   const handleTFRevisitSubmit = async ({ engineer, comment }) => {
     try {
       const payload = {
@@ -357,7 +361,7 @@ const DetailScreen = () => {
 
       console.log('[📤 Submitting TF Revisit]', payload);
 
-      const response = await postRequest(TF_REVISIT_SUBMIT_URL, payload);
+      const response = await postRequest(TF_ENG_LIST_URL, payload);
 
       if (response?.success) {
         Alert.alert('Success', 'TF Revisit request submitted successfully.');
@@ -528,10 +532,18 @@ const DetailScreen = () => {
         </View>
       </View>
 
-      <RejectReasonModal visible={isRejectModalVisible} onClose={() => setRejectModalVisible(false)} onSubmit={(data) => console.log('Rejected:', data)} />
-      <ApproveCommentModal 
-      visible={isApproveModalVisible} 
-      onClose={() => setApproveModalVisible(false)} 
+      <RejectReasonModal
+        visible={isRejectModalVisible}
+        onClose={() => setRejectModalVisible(false)}
+        onSubmit={(data) => {
+          console.log('Rejected:', data);
+          Alert.alert('Rejected', 'Order has been rejected successfully.');
+        }}
+      />
+
+      <ApproveCommentModal
+        visible={isApproveModalVisible}
+        onClose={() => setApproveModalVisible(false)}
         onSubmit={handleApproveSubmit} />
       <TFrevisitModal
         visible={isTFRevisitVisible}
