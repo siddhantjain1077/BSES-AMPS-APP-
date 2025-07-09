@@ -92,6 +92,7 @@ const getStyles = (colors, isDark) =>
     },
     sectionTitle: {
       fontSize: 20,
+      marginTop: -25,
       fontWeight: 'bold',
       marginBottom: 10,
       color: colors.text,

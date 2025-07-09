@@ -4,18 +4,29 @@ import HomeScreen from '../screens/HomeScreen';
 import ForgetScreen from '../screens/ForgetScreen';
 import { CustomDrawerContent } from '../components/CustomDrawerContent'; 
 import ThemeScreen from '../screens/ThemeScreen';
+import { useTheme } from '../screens/ThemeContext'; // Import your theme hook
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = () => {
+  const { isDark, colors } = useTheme(); // Get theme values
+
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerShown: true,
-        drawerActiveTintColor: '#007bff',
-        drawerInactiveTintColor: '#000', // Set inactive drawer color to black
+        drawerStyle: {
+          backgroundColor: colors.drawerBg || (isDark ? '#121212' : '#fff'),
+        },
+        drawerActiveTintColor: colors.text || (isDark ? '#fff' : '#000'),
+        drawerInactiveTintColor: colors.text || (isDark ? '#ccc' : '#000'),
+
         drawerLabelStyle: { fontWeight: 'bold' },
+        headerStyle: {
+          backgroundColor: colors.headerBg || (isDark ? '#1c1c1c' : '#f8f9fa'),
+        },
+        headerTintColor: colors.text || (isDark ? '#fff' : '#000'),
       }}
     >
       <Drawer.Screen

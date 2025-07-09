@@ -8,6 +8,7 @@ import {
   StyleSheet,
   BackHandler,
   Alert,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -138,6 +139,14 @@ const HomeScreen = ({ navigation }) => {
         <Text style={[styles.headerText, { color: colors.text }]}>
           👋 Welcome, AMPS User
         </Text>
+        <Image
+          source={
+            isDark
+              ? require('../assets/BijliSevaKendra_withoutBG.png')
+              : require('../assets/Bijli_kendra_white.png')
+          }
+          style={styles.logo}
+        />
       </View>
 
       {/* Tab Buttons */}
@@ -148,15 +157,15 @@ const HomeScreen = ({ navigation }) => {
             ? tab === 'Pending'
               ? '#007bff'
               : tab === 'Approved'
-              ? '#28a745'
-              : '#dc3545'
+                ? '#28a745'
+                : '#dc3545'
             : 'transparent';
           const border =
             tab === 'Pending'
               ? '#007bff'
               : tab === 'Approved'
-              ? '#28a745'
-              : '#dc3545';
+                ? '#28a745'
+                : '#dc3545';
           const color = isActive ? '#fff' : border;
 
           return (
@@ -225,8 +234,8 @@ const HomeScreen = ({ navigation }) => {
                 {item.caseFlag === 'A'
                   ? 'Approved'
                   : item.caseFlag === 'R'
-                  ? 'Rejected'
-                  : 'Pending'}
+                    ? 'Rejected'
+                    : 'Pending'}
               </Text>
             </View>
           </TouchableOpacity>
@@ -248,9 +257,10 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: 'row',
+    marginTop: -40,
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: -29,
   },
   headerText: {
     fontSize: 20,
@@ -263,6 +273,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: 10,
   },
+  logo: {
+    width: 140,
+    height: 140,
+    resizeMode: 'contain',
+  },
+
   tabButton: {
     borderWidth: 1,
     paddingVertical: 8,

@@ -12,8 +12,11 @@ import {
   Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../screens/ThemeContext'; // Import your theme hook
 
 export function CustomDrawerContent(props) {
+  const { colors } = useTheme(); // Get theme colors
+
   const handleLogout = async () => {
     try {
       await AsyncStorage.multiRemove(['token', 'tokenExpiry']);
@@ -31,14 +34,18 @@ export function CustomDrawerContent(props) {
           source={require('../assets/user_imgae.jpeg')}
           style={styles.logo}
         />
-        <Text style={styles.userText}>👋 Welcome, AMPS User</Text>
+        <Text style={[styles.userText, { color: colors.text }]}>
+          👋 Welcome, AMPS User
+        </Text>
       </View>
 
       <DrawerItemList {...props} />
 
       <DrawerItem
         label={() => (
-          <Text style={{ fontWeight: 'bold', color: '#000' }}>🚪 Logout</Text>
+          <Text style={{ fontWeight: 'bold', color: colors.text }}>
+            🚪 Logout
+          </Text>
         )}
         onPress={handleLogout}
       />
@@ -52,6 +59,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomColor: '#ccc',
     borderBottomWidth: 0.5,
+    marginBottom: 10,
   },
   logo: {
     width: 80,
