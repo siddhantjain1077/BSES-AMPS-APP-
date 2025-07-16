@@ -108,5 +108,3 @@ Token-based authentication is stored in `AsyncStorage`. Token expiration is hand
 - Switch tabs to test API response rendering.
 - Submit approval/rejection to test payloads and server responses.
 - Use offline mode to test the network guard component.
-
----
