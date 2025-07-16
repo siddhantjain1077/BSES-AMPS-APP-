@@ -62,12 +62,6 @@ App.js
 
 ---
 
-## 📸 Screenshots
-
-_(You can add screenshots of login, home, detail, and modal screens here)_
-
----
-
 ## ⚙️ Setup & Run Instructions
 
 1. **Clone this repository**
