@@ -101,20 +101,6 @@ Token-based authentication is stored in `AsyncStorage`. Token expiration is hand
 
 ---
 
-## 🌐 API Endpoints
-
-Base URL: `https://test.bsesbrpl.co.in/AMPS_APP`
-
-Key endpoints used:
-
-- `/api/Auth/login`
-- `/api/AMPS/PendingCaseList`
-- `/api/AMPS/ViewPendingOrder_16062025`
-- `/api/AMPS/AMPSAction_30042025`
-- `/api/AMPS/TfEngineerByDivision`
-- `/api/AMPS/OrderWebsiteStatusLog`
-
----
 
 ## 🧪 Testing Tips
 
