@@ -1,97 +1,138 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 📱 AMPS Mobile App
 
-# Getting Started
+This is a **React Native application** built for field engineers and AMPS users at BSES, enabling them to:
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+- View pending electricity cases
+- Approve or reject orders
+- Submit TF revisit requests
+- Change passwords
+- Access history logs
+- Use dark/light/system theme modes
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 🚀 Features
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- 🔐 **Login & Secure Token Storage**
+- ✅ **Pending, Approved, and Rejected Cases** listing with filtering
+- 📋 **Detailed Order View** with collapsible cards
+- 🔁 **TF Revisit** engineer assignment
+- ⚠️ **Rejection Handling** with grouped reason modals
+- 💬 **Approval/Comment Submission**
+- 🌓 **Theme Support** (Dark / Light / System)
+- 🔗 **Network Guard** to prevent actions when offline
+- 📆 **Search by Dates and Query**
+- 🔒 **Change Password Functionality**
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
-yarn start
+## 📂 Project Structure
+
+```
+/screens
+  ├── LoginScreen.js
+  ├── ForgetScreen.js
+  ├── HomeScreen.js
+  ├── DetailScreen.js
+  ├── ThemeScreen.js
+  └── ThemeContext.js
+
+/components
+  └── NetworkGuard.js
+
+/Navigation
+  └── DrawerNavigator.js
+
+/Services
+  └── api.js
+
+App.js
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## 🛠️ Tech Stack
 
-### Android
+- React Native
+- React Navigation
+- AsyncStorage
+- DayJS
+- @react-native-community/datetimepicker
+- Custom Dark/Light Theme Context
 
-```sh
-# Using npm
-npm run android
+---
 
-# OR using Yarn
-yarn android
+## 📸 Screenshots
+
+_(You can add screenshots of login, home, detail, and modal screens here)_
+
+---
+
+## ⚙️ Setup & Run Instructions
+
+1. **Clone this repository**
+
+```bash
+git clone https://github.com/your-username/amps-app.git
+cd amps-app
 ```
 
-### iOS
+2. **Install dependencies**
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+npm install
+# or
+yarn install
 ```
 
-Then, and every time you update your native dependencies, run:
+3. **Run on Android**
 
-```sh
-bundle exec pod install
+```bash
+npx react-native run-android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+4. **Run on iOS (Mac only)**
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+```bash
+npx react-native run-ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+> Ensure Android Studio / Xcode is properly set up before running.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+---
 
-## Step 3: Modify your app
+## 🔐 Environment
 
-Now that you have successfully run the app, let's make changes!
+Token-based authentication is stored in `AsyncStorage`. Token expiration is handled automatically with session expiry checks on every major API call.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+---
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 🌐 API Endpoints
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Base URL: `https://test.bsesbrpl.co.in/AMPS_APP`
 
-## Congratulations! :tada:
+Key endpoints used:
 
-You've successfully run and modified your React Native App. :partying_face:
+- `/api/Auth/login`
+- `/api/AMPS/PendingCaseList`
+- `/api/AMPS/ViewPendingOrder_16062025`
+- `/api/AMPS/AMPSAction_30042025`
+- `/api/AMPS/TfEngineerByDivision`
+- `/api/AMPS/OrderWebsiteStatusLog`
 
-### Now what?
+---
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## 🧪 Testing Tips
 
-# Troubleshooting
+- Simulate login with test credentials.
+- Switch tabs to test API response rendering.
+- Submit approval/rejection to test payloads and server responses.
+- Use offline mode to test the network guard component.
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
+## 🧑‍💻 Author
 
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**Siddhant Jain**  
+Built as part of internship assignment at BSES BRPL.  
+Feel free to contribute or raise issues!
