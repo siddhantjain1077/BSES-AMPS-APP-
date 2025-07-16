@@ -9,7 +9,7 @@ import {
   ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
-import bgImage from '../assets/change_password.png';
+import bgImage from '../assets/change_password.jpeg';
 import { FORGET_PASSWORD } from '../Services/api';
 
 const ForgetScreen = () => {
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(25, 27, 116, 0.7)',
+    // backgroundColor: 'rgba(25, 27, 116, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 15,
