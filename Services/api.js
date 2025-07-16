@@ -12,8 +12,11 @@ export const DROPDOWN_LIST_URL = `${BASE_URL}/api/AMPS/DeficiencyListMST`;      
 export const COMPLETED_CASE_URL = `${BASE_URL}/api/AMPS/AMPSActionCompletedCaseList`; // Submit completed case
 export const TF_ENG_LIST_URL = `${BASE_URL}/api/AMPS/TfEngineerByDivision`;          // Fetch TF engineers list by division
 export const TF_REVISIT_SUBMIT_URL = `${BASE_URL}/api/AMPS/TFRevisitSubmit`;         // Submit TF revisit request
-
+export const FORGET_PASSWORD = `${BASE_URL}/api/Auth/ChangePassword`;          // Change password endpoint
+export const ARAActions = `${BASE_URL}/api/AMPS/AMPSAction_30042025`; // Fetch ARA actions
+export const historyLogs = `${BASE_URL}/api/AMPS/OrderWebsiteStatusLog`; // Fetch history logs
 // ✅ POST request helper function
+
 export const postRequest = async (url, payload) => {
   try {
     // Get stored token from AsyncStorage

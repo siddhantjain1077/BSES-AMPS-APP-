@@ -9,11 +9,31 @@ const getStyles = (colors, isDark) =>
     },
 
     BijliSevaKendraImage: {
-      width: '100%',
+      width: '70%',
       height: 170,
-      marginBottom: 12,
-      marginTop: 17,
+      marginBottom: -33,
+      marginLeft: '12%',
+      resizeMode: 'contain',
+      borderRadius: 10,
+      marginTop: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
+    backButton: {
+      marginTop: 10,
+      marginLeft: 10,
+      padding: 8,
+      alignSelf: 'flex-start',
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      elevation: 3,
+    },
+    backButtonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+
 
     row: {
       flexDirection: 'row',
@@ -91,11 +111,15 @@ const getStyles = (colors, isDark) =>
       borderTopRightRadius: 8,
     },
     sectionTitle: {
-      fontSize: 20,
-      marginTop: -25,
+      fontSize: 18,
       fontWeight: 'bold',
       marginBottom: 10,
+
+      // marginTop: ,   // ✅ Add some top space instead of negative
       color: colors.text,
+      // textAlign: 'center',
+      // marginRight: 280, // ✅ Add some right space to avoid text overflow
+      margintop: -10, // ✅ Add some top space instead of negative
     },
 
     collapsibleTitle: {
@@ -172,6 +196,8 @@ const getStyles = (colors, isDark) =>
       borderRadius: 8,
       fontWeight: 'bold',
       marginBottom: 15,
+      // marginTop: 10,
+      // width: '100%',
       alignSelf: 'stretch',
       textAlign: 'center',
     },
@@ -265,18 +291,18 @@ const getStyles = (colors, isDark) =>
       padding: 10,
       maxHeight: 150,
     },
-   engineerCard: {
-  padding: 12,
-  marginVertical: 8,
-  borderRadius: 10,
-  borderWidth: 1,
-  borderColor: '#ccc',
-  backgroundColor: '#f2f2f2',
-},
+    engineerCard: {
+      padding: 12,
+      marginVertical: 8,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      backgroundColor: '#f2f2f2',
+    },
     selectedEngineerCard: {
-  borderColor: '#007bff',
-  backgroundColor: '#e6f0ff',
-},
+      borderColor: '#007bff',
+      backgroundColor: '#e6f0ff',
+    },
     engineerText: {
       fontSize: 14,
       color: colors.text,
@@ -298,18 +324,18 @@ const getStyles = (colors, isDark) =>
       borderRadius: 6,
     },
     dropdownContainer: {
-  borderWidth: 1,
-  borderColor: '#ccc',
-  borderRadius: 6,
-  marginVertical: 10,
-},
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 6,
+      marginVertical: 10,
+    },
 
-pickerStyle: {
-  height: 60,
-  // width: '100%',  
-  color: colors.text,
-  fontSize: 14,
-}
+    pickerStyle: {
+      height: 60,
+      // width: '100%',  
+      color: colors.text,
+      fontSize: 14,
+    }
   });
 
 export default getStyles;

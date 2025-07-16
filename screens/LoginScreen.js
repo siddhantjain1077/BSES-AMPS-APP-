@@ -31,7 +31,7 @@ const LoginScreen = ({ navigation }) => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem('token');
       const expiry = await AsyncStorage.getItem('tokenExpiry');
-
+      console.log("Response name:", response);
       console.log('[AutoLogin Check]', { token, expiry });
 
       if (token && expiry && Date.now() < parseInt(expiry)) {
@@ -51,7 +51,7 @@ const LoginScreen = ({ navigation }) => {
   // Handle login button click
   const handleLogin = async () => {
     const userid = 'dsktfauTo';
-    const password = 'BSES@321';
+    const password = 'bses@321';
 
     const val = { username: userid, password };
 
@@ -61,7 +61,7 @@ const LoginScreen = ({ navigation }) => {
       // Make POST request to login API
       const result = await postRequest(LOGIN_URL, val);
       console.log('Login response:', result);
-
+      console.log(result?.data);
       const token = result?.data?.token;
 
       if (result?.success && token) {
@@ -121,8 +121,8 @@ const LoginScreen = ({ navigation }) => {
             <Text style={styles.label}>PASSWORD</Text>
             <TextInput
               style={styles.input}
-              placeholder="BSES@321"
-              value="BSES@321"
+              placeholder="bses@321"
+              value="bses@321"
               editable={false}
               placeholderTextColor="#fff"
               secureTextEntry

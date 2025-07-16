@@ -5,6 +5,8 @@ import ForgetScreen from '../screens/ForgetScreen';
 import { CustomDrawerContent } from '../components/CustomDrawerContent'; 
 import ThemeScreen from '../screens/ThemeScreen';
 import { useTheme } from '../screens/ThemeContext'; // Import your theme hook
+import { useLayoutEffect } from 'react';
+import { Text, TouchableOpacity } from 'react-native';
 
 const Drawer = createDrawerNavigator();
 
@@ -30,6 +32,7 @@ const DrawerNavigator = () => {
       }}
     >
       <Drawer.Screen
+      
         name="Home"
         component={HomeScreen}
         options={{

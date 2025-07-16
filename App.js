@@ -17,6 +17,8 @@ import DetailScreen from './screens/DetailScreen';
 import DrawerNavigator from './Navigation/DrawerNavigator';
 import { ThemeProvider } from './screens/ThemeContext'; // Custom theme context for dark/light modes
 
+import NetworkGuard from './components/NetworkGuard'; // Network connectivity guard component
+
 // Enable screen optimization for better navigation performance
 enableScreens();
 
@@ -37,6 +39,8 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/* Global theme context provider */}
       <ThemeProvider>
+        {/* Network connectivity guard to prevent actions when offline */}
+        <NetworkGuard>
         {/* Root navigation container */}
         <NavigationContainer>
           {/* Define stack-based navigation flow */}
@@ -68,6 +72,7 @@ export default function App() {
             />
           </Stack.Navigator>
         </NavigationContainer>
+        </NetworkGuard>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
