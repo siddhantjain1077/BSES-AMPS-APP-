@@ -110,9 +110,3 @@ Token-based authentication is stored in `AsyncStorage`. Token expiration is hand
 - Use offline mode to test the network guard component.
 
 ---
-
-## 🧑‍💻 Author
-
-**Siddhant Jain**  
-Built as part of internship assignment at BSES BRPL.  
-Feel free to contribute or raise issues!
