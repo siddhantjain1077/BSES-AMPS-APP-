@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -12,10 +11,10 @@ import {
   Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../screens/ThemeContext'; // Import your theme hook
+import { useTheme } from '../screens/ThemeContext';
 
 export function CustomDrawerContent(props) {
-  const { colors } = useTheme(); // Get theme colors
+  const { colors, isDark, setMode } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -25,6 +24,11 @@ export function CustomDrawerContent(props) {
       console.error('Logout failed:', error);
       Alert.alert('Logout Error', 'Something went wrong while logging out.');
     }
+  };
+
+  const handleThemeToggle = () => {
+    const newTheme = isDark ? 'light' : 'dark';
+    setMode(newTheme);
   };
 
   return (
@@ -41,6 +45,17 @@ export function CustomDrawerContent(props) {
 
       <DrawerItemList {...props} />
 
+      {/* 🎨 Theme Toggle Button */}
+      <DrawerItem
+        label={() => (
+          <Text style={{ fontWeight: 'bold', color: colors.text }}>
+            🎨 Switch to {isDark ? 'Light' : 'Dark'} Mode
+          </Text>
+        )}
+        onPress={handleThemeToggle}
+      />
+
+      {/* 🚪 Logout Button */}
       <DrawerItem
         label={() => (
           <Text style={{ fontWeight: 'bold', color: colors.text }}>

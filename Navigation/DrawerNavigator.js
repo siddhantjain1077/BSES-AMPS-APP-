@@ -46,13 +46,13 @@ const DrawerNavigator = () => {
           drawerLabel: '🔑 Change Password',
         }}
       />
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="Theme Settings"
         component={ThemeScreen}
         options={{
           drawerLabel: '🎨 Theme Settings',
-        }}
-      />
+        }} */}
+      {/* /> */}
     </Drawer.Navigator>
   );
 };

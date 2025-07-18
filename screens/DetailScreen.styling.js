@@ -296,16 +296,16 @@ const getStyles = (colors, isDark) =>
       marginVertical: 8,
       borderRadius: 10,
       borderWidth: 1,
-      borderColor: '#ccc',
-      backgroundColor: '#f2f2f2',
+      borderColor: colors.border || '#ccc',
+      backgroundColor: colors.card || '#f2f2f2', // Use themed card background
     },
     selectedEngineerCard: {
-      borderColor: '#007bff',
-      backgroundColor: '#e6f0ff',
+      borderColor: colors.badgeText || '#007bff',
+      backgroundColor: colors.badgeBg || '#e6f0ff',
     },
     engineerText: {
       fontSize: 14,
-      color: colors.text,
+      color: colors.text || '#000', // Themed text color
     },
 
     dropdownItem: {
